@@ -2,7 +2,7 @@ import praw
 
 # {"hot":{"subreddit_name":{"title": [], "score": [], "id": [], "url": [], "comms_num": [], "created": [], "body": []},
 # "new": {...}}}
-# {"hot":{"subreddit_name":{"score": [], "magnitude": [],  ...},
+# {"hot":{"subreddit_name":{"Sentiment": [], "SentimentScore": [],  ...},
 # "new": {...}}}
 
 submissions = {"hot": {}, "new": {}}
@@ -13,7 +13,7 @@ def get_id_values():
     file = open("id.txt", "r")
     ids = file.readlines()
     file.close()
-    return ids[0].rstrip(), ids[1].rstrip(), ids[2].rstrip(), ids[3].rstrip()
+    return ids[0].strip(), ids[1].strip(), ids[2].strip(), ids[3].strip()
 
 
 def init_reddit_scraper():
@@ -34,15 +34,23 @@ def setup_structure_for_subreddit(subreddit):
     analysis_results["new"][subreddit]["title"] = {}
     analysis_results["new"][subreddit]["body"] = {}
 
-    analysis_results["hot"][subreddit]["title"]["score"] = []
-    analysis_results["hot"][subreddit]["title"]["magnitude"] = []
-    analysis_results["hot"][subreddit]["body"]["score"] = []
-    analysis_results["hot"][subreddit]["body"]["magnitude"] = []
+    # a list of the bodies of text that was analyzed
+    analysis_results["hot"][subreddit]["title"]["text"] = []
+    # a list of Strings: MIXED, POSITIVE, NEUTRAL, NEGATIVE
+    analysis_results["hot"][subreddit]["title"]["Sentiment"] = []
+    # list of objects {"mixed": int, "positive": int, "neutral": int, "negative": int}
+    analysis_results["hot"][subreddit]["title"]["SentimentScore"] = []
 
-    analysis_results["new"][subreddit]["title"]["score"] = []
-    analysis_results["new"][subreddit]["title"]["magnitude"] = []
-    analysis_results["new"][subreddit]["body"]["score"] = []
-    analysis_results["new"][subreddit]["body"]["magnitude"] = []
+    analysis_results["hot"][subreddit]["body"]["text"] = []
+    analysis_results["hot"][subreddit]["body"]["Sentiment"] = []
+    analysis_results["hot"][subreddit]["body"]["SentimentScore"] = []
+
+    analysis_results["new"][subreddit]["title"]["text"] = []
+    analysis_results["new"][subreddit]["title"]["Sentiment"] = []
+    analysis_results["new"][subreddit]["title"]["SentimentScore"] = []
+    analysis_results["new"][subreddit]["body"]["text"] = []
+    analysis_results["new"][subreddit]["body"]["Sentiment"] = []
+    analysis_results["new"][subreddit]["body"]["SentimentScore"] = []
 
     submissions["hot"][subreddit] = {}
     submissions["new"][subreddit] = {}

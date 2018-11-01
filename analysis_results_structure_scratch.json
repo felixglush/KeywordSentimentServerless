@@ -1,0 +1,37 @@
+{
+  "hot": {
+    "uwaterloo": {
+      "title": {
+        "text": [
+          "text1",
+          "text2"
+        ],
+        "Sentiment": [
+          "NEUTRAL",
+          "POSITIVE"
+        ],
+        "SentimentScore": [
+          {
+            "Mixed": 0.014585512690246105,
+            "Positive": 0.31592071056365967,
+            "Neutral": 0.5985543131828308,
+            "Negative": 0.07093945890665054
+          },
+          {
+            "Mixed": 0.014585512690246105,
+            "Positive": 0.31592071056365967,
+            "Neutral": 0.5985543131828308,
+            "Negative": 0.07093945890665054
+          }
+        ]
+      },
+      "body": {
+        "text": [],
+        "Sentiment": [],
+        "SentimentScore": [
+          {}
+        ]
+      }
+    }
+  }
+}
