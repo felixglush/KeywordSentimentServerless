@@ -30,12 +30,20 @@ def add_comprehend_result(analysis_results, subreddit, text, submission_type_str
         sentiment_score_list.append(None)
 
 
+def add_auxiliary_data(analysis_results, key, submission_type, submission_type_string, subreddit):
+    key_target = analysis_results["reddit"][subreddit][submission_type_string][key]
+    key_target["urls"] = submission_type[subreddit][key]["url"]
+    key_target["ids"] = submission_type[subreddit][key]["id"]
+    key_target["upvotes"] = submission_type[subreddit][key]["score"]
+    key_target["creation_dates"] = submission_type[subreddit][key]["created"]
+
+
 def populate_analysis_results(submission_type, submission_type_string, analysis_results):
     for subreddit in submission_type:
         for key in submission_type[subreddit]:
             titles = submission_type[subreddit][key]["title"]
             bodies = submission_type[subreddit][key]["body"]
-            
+            add_auxiliary_data(analysis_results, key, submission_type, submission_type_string, subreddit)
             for title_text in titles:
                 add_comprehend_result(analysis_results, subreddit, title_text,
                                       submission_type_string, "title", key)

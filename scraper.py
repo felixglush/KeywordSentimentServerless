@@ -53,3 +53,5 @@ def scrape_submissions_from_subreddits(reddit, subreddits_list, keywords_list):
     return sts.submissions, sts.analysis_results
 
 
+def get_data():
+    pass

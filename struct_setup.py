@@ -1,5 +1,3 @@
-
-
 submissions = {"hot": {}, "new": {}}
 analysis_results = {}
 

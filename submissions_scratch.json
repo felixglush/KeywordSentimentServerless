@@ -1,0 +1,18 @@
+{
+  "hot": {
+    "subreddit_name": {
+      "keyword1": {
+        "title": [],
+        "score": [],
+        "id": [],
+        "url": [],
+        "comms_num": [],
+        "created": [],
+        "body": []
+      }
+    },
+    "new": {
+
+    }
+  }
+}
