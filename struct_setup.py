@@ -1,7 +1,4 @@
-# {"hot":{"subreddit_name":{"title": [], "score": [], "id": [], "url": [], "comms_num": [], "created": [], "body": []},
-# "new": {...}}}
-# {"hot":{"subreddit_name":{"Sentiment": [], "SentimentScore": [],  ...},
-# "new": {...}}}
+
 
 submissions = {"hot": {}, "new": {}}
 analysis_results = {}
@@ -45,22 +42,33 @@ def setup_structure_for_subreddit(subreddit, keywords_list):
         new_branch[key]["body"]["Sentiment"] = []
         new_branch[key]["body"]["SentimentScore"] = []
 
-    submissions["hot"][subreddit] = {}
-    submissions["new"][subreddit] = {}
-    submissions["hot"][subreddit]["title"] = []
-    submissions["hot"][subreddit]["score"] = []
-    submissions["hot"][subreddit]["id"] = []
-    submissions["hot"][subreddit]["url"] = []
-    submissions["hot"][subreddit]["comms_num"] = []
-    submissions["hot"][subreddit]["created"] = []
-    submissions["hot"][subreddit]["body"] = []
-    submissions["new"][subreddit]["title"] = []
-    submissions["new"][subreddit]["score"] = []
-    submissions["new"][subreddit]["id"] = []
-    submissions["new"][subreddit]["url"] = []
-    submissions["new"][subreddit]["comms_num"] = []
-    submissions["new"][subreddit]["created"] = []
-    submissions["new"][subreddit]["body"] = []
+        # {"hot":{"subreddit_name":{"title": [], "score": [], "id": [], "url": [], "comms_num": [], "created": [], "body": []},
+        # "new": {...}}}
+        # {"hot":{"subreddit_name":{"Sentiment": [], "SentimentScore": [],  ...},
+        # "new": {...}}}
+
+        submissions["hot"][subreddit] = {}
+        submissions["hot"][subreddit][key] = {}
+        hot_keyword_object = submissions["hot"][subreddit][key]
+        hot_keyword_object["title"] = []
+        hot_keyword_object["score"] = []
+        hot_keyword_object["id"] = []
+        hot_keyword_object["url"] = []
+        hot_keyword_object["comms_num"] = []
+        hot_keyword_object["created"] = []
+        hot_keyword_object["body"] = []
+
+        submissions["new"][subreddit] = {}
+        submissions["new"][subreddit][key] = {}
+        new_keyword_object = submissions["new"][subreddit][key]
+        new_keyword_object["title"] = []
+        new_keyword_object["score"] = []
+        new_keyword_object["id"] = []
+        new_keyword_object["url"] = []
+        new_keyword_object["comms_num"] = []
+        new_keyword_object["created"] = []
+        new_keyword_object["body"] = []
+
 
 def setup_structure_for_twitter():
     pass

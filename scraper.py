@@ -31,7 +31,7 @@ def iter_submission_type(submission_type, type_string, keywords_list, subreddit)
         post_text = submission.selftext
         for keyword in keywords_list:
             if keyword in post_title or keyword in post_text:
-                subreddit_branch = sts.submissions[type_string][subreddit]
+                subreddit_branch = sts.submissions[type_string][subreddit][keyword]
                 subreddit_branch["title"].append(post_title)
                 subreddit_branch["score"].append(submission.score)  # upvotes
                 subreddit_branch["id"].append(submission.id)

@@ -32,10 +32,10 @@ def add_comprehend_result(analysis_results, subreddit, text, submission_type_str
 
 def populate_analysis_results(submission_type, submission_type_string, analysis_results):
     for subreddit in submission_type:
-        titles = submission_type[subreddit]["title"]
-        bodies = submission_type[subreddit]["body"]
-
-        for key in analysis_results["keywords"]:
+        for key in submission_type[subreddit]:
+            titles = submission_type[subreddit][key]["title"]
+            bodies = submission_type[subreddit][key]["body"]
+            
             for title_text in titles:
                 add_comprehend_result(analysis_results, subreddit, title_text,
                                       submission_type_string, "title", key)
