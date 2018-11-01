@@ -11,6 +11,11 @@ def run():
 
     reddit = scraper.init_reddit_scraper()
     submissions, analysis_results = scraper.scrape_submissions_from_subreddits(reddit, subreddits_list, keywords_list)
-    sentimenter.analyze(submissions, analysis_results)  # (desired) side effect: analysis_results will be modified.
+    analysis_results["sources"] = ["reddit"]
+    analysis_results["keywords"] = keywords_list
 
+    # (desired) side effect: analysis_results will be modified
+    sentimenter.analyze(submissions, analysis_results)
+    print(analysis_results)
     return analysis_results
+run()

@@ -3,8 +3,6 @@ import app
 
 
 def hello(event, context):
-    print("event: ", event)
-    print("context: ", context)
     result = app.run()
     print("result", result)
     body = {

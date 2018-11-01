@@ -1,37 +1,79 @@
 {
-  "hot": {
-    "uwaterloo": {
-      "title": {
-        "text": [
-          "text1",
-          "text2"
-        ],
-        "Sentiment": [
-          "NEUTRAL",
-          "POSITIVE"
-        ],
-        "SentimentScore": [
-          {
-            "Mixed": 0.014585512690246105,
-            "Positive": 0.31592071056365967,
-            "Neutral": 0.5985543131828308,
-            "Negative": 0.07093945890665054
+  "sources": [
+    "reddit",
+    "twitter"
+  ],
+  "keywords": [
+    "keyword1",
+    "keyword2"
+  ],
+  "reddit": {
+    "subreddit1": {
+      "hot": {
+        "keyword1": {
+          "urls": [],
+          "ids": [],
+          "upvotes": [],
+          "creation_dates": [],
+          "title": {
+            "text": [
+              "text1",
+              "text2"
+            ],
+            "Sentiment": [
+              "NEUTRAL",
+              "POSITIVE"
+            ],
+            "SentimentScore": [
+              {
+                "Mixed": 0.014585512690246105,
+                "Positive": 0.31592071056365967,
+                "Neutral": 0.5985543131828308,
+                "Negative": 0.07093945890665054
+              },
+              {
+                "Mixed": 0.014585512690246105,
+                "Positive": 0.31592071056365967,
+                "Neutral": 0.5985543131828308,
+                "Negative": 0.07093945890665054
+              }
+            ]
           },
-          {
-            "Mixed": 0.014585512690246105,
-            "Positive": 0.31592071056365967,
-            "Neutral": 0.5985543131828308,
-            "Negative": 0.07093945890665054
+          "body": {
+            "text": [],
+            "Sentiment": [],
+            "SentimentScore": [
+              {}
+            ]
           }
-        ]
+        },
+        "keyword2": {
+          "urls": [],
+          "ids": [],
+          "upvotes": [],
+          "creation_dates": [],
+          "title": {
+            "text": [],
+            "Sentiment": [],
+            "SentimentScore": [
+              {}
+            ]
+          },
+          "body": {
+            "text": [],
+            "Sentiment": [],
+            "SentimentScore": [
+              {}
+            ]
+          }
+        }
       },
-      "body": {
-        "text": [],
-        "Sentiment": [],
-        "SentimentScore": [
-          {}
-        ]
+      "new": {
       }
+    },
+    "subreddit2": {
     }
+  },
+  "twitter": {
   }
 }

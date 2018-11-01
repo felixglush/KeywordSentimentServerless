@@ -1,16 +1,22 @@
 import boto3
+import json
 
 comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
+
+
+def json_comprehend_sentiment(text):
+    return json.dumps(comprehend_sentiment(text))
 
 
 def comprehend_sentiment(text):
     return comprehend.detect_sentiment(Text=text, LanguageCode='en')
 
 
-def add_comprehend_result(analysis_results, subreddit, text, submission_type_string, text_type_string):
-    text_list = analysis_results[submission_type_string][subreddit][text_type_string]["text"]
-    sentiment_list = analysis_results[submission_type_string][subreddit][text_type_string]["Sentiment"]
-    sentiment_score_list = analysis_results[submission_type_string][subreddit][text_type_string]["SentimentScore"]
+def add_comprehend_result(analysis_results, subreddit, text, submission_type_string, text_type_string, keyword):
+    target = analysis_results["reddit"][subreddit][submission_type_string][keyword][text_type_string]
+    text_list = target["text"]
+    sentiment_list = target["Sentiment"]
+    sentiment_score_list = target["SentimentScore"]
     if len(text) > 0:
         comprehend_result = comprehend_sentiment(text)
         sentiment = comprehend_result['Sentiment']
@@ -29,11 +35,14 @@ def populate_analysis_results(submission_type, submission_type_string, analysis_
         titles = submission_type[subreddit]["title"]
         bodies = submission_type[subreddit]["body"]
 
-        for title_text in titles:
-            add_comprehend_result(analysis_results, subreddit, title_text, submission_type_string, "title")
+        for key in analysis_results["keywords"]:
+            for title_text in titles:
+                add_comprehend_result(analysis_results, subreddit, title_text,
+                                      submission_type_string, "title", key)
 
-        for body_text in bodies:
-            add_comprehend_result(analysis_results, subreddit, body_text, submission_type_string, "body")
+            for body_text in bodies:
+                add_comprehend_result(analysis_results, subreddit, body_text,
+                                      submission_type_string, "body", key)
 
 
 def analyze(submissions, analysis_results):
