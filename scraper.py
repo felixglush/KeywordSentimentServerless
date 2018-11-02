@@ -44,6 +44,8 @@ def iter_submission_type(submission_type, type_string, keywords_list, subreddit)
 # Returns two dictionaries: scrapped info for the specified subreddits
 # and an analysis_results DS with empty lists for the scores and magnitudes of each submission
 def scrape_submissions_from_subreddits(reddit, subreddits_list, keywords_list):
+    sts.analysis_results["reddit"] = {}
+    sts.analysis_results["reddit"]["subreddits"] = []
     for subreddit in subreddits_list:
         hot, new = get_submissions(reddit, subreddit)
         data = {"subreddit": subreddit, "keywords_list": keywords_list}

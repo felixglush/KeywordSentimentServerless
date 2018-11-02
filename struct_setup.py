@@ -3,7 +3,7 @@ analysis_results = {}
 
 
 def setup_structure_for_subreddit(subreddit, keywords_list):
-    analysis_results["reddit"] = {}
+    analysis_results["reddit"]["subreddits"].append(subreddit)
     analysis_results["reddit"][subreddit] = {}
     analysis_results["reddit"][subreddit]["hot"] = {}
     analysis_results["reddit"][subreddit]["new"] = {}

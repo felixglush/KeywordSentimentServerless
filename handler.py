@@ -3,13 +3,19 @@ import app
 
 
 def hello(event, context):
-    result = app.run()
-    print("result", result)
+    # todo: get query_parameters from event
+    query_parameters = {
+        "keywords_list": ["The"],
+        "subreddits_list": ["uwaterloo"],
+        "sources": ["reddit"]
+    }
+
+    result = app.run(query_parameters)
+
     body = {
         "message": "Hey there! The function executed successfully!",
-        "result": result,
+        "result": json.dumps(result),
         "input": event
-
     }
 
     response = {
