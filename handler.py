@@ -4,10 +4,13 @@ import app
 
 def hello(event, context):
     # todo: get query_parameters from event
+    print("Printing from event object: ", event["keywords_list"])
+    print("Printing from event object: ", event["subreddits_list"])
+    print("Printing from event object: ", event["sources"])
     query_parameters = {
-        "keywords_list": ["The"],
-        "subreddits_list": ["uwaterloo"],
-        "sources": ["reddit"]
+        "keywords_list": event["keywords_list"],
+        "subreddits_list": event["subreddits_list"],
+        "sources": event["sources"]
     }
 
     result = app.run(query_parameters)
