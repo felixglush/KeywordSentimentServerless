@@ -4,7 +4,7 @@ import sentimenter
 
 # See the *_scratch.json files for the submissions and analysis_results structure templates
 
-def run(query_parameters):
+def run_scraper(query_parameters):
     print("running")
     sources = query_parameters["sources"]
     keywords_list = query_parameters["keywords_list"]
@@ -29,9 +29,5 @@ def run(query_parameters):
     return analysis_results
 
 
-mock_query_parameters = {
-    "keywords_list": ["The"],
-    "subreddits_list": ["uwaterloo"],
-    "sources": ["reddit"],
-}
-#run(mock_query_parameters)
+def run_create_table(name):
+    pass

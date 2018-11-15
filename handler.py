@@ -13,11 +13,27 @@ def hello(event, context):
         "sources": event["sources"]
     }
 
-    result = app.run(query_parameters)
+    result = app.run_scraper(query_parameters)
 
     body = {
         "message": "Hey there! The function executed successfully!",
         "result": json.dumps(result),
+        "input": event
+    }
+
+    response = {
+        "statusCode": 200,
+        "body": json.dumps(body)
+    }
+
+    return response
+
+
+def create_campaign_table(event, context):
+    print("DynamoDB trigger called lambda function")
+    # app.run_create_table(event["campaign_table_name"])
+    body = {
+        "message": "Hey there! The function executed successfully!",
         "input": event
     }
 
