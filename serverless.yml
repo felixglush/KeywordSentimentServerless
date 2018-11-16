@@ -56,7 +56,7 @@ provider:
 
 functions:
   hello:
-    handler: handler.hello
+    handler: handler.scrape
   createCampaignTable:
     handler: handler.create_campaign_table
 

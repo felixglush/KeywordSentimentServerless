@@ -1,8 +1,9 @@
-import scraper
-import sentimenter
-
+from scraper import scraper
+from scraper import sentimenter
+from db import accessor as ddb
 
 # See the *_scratch.json files for the submissions and analysis_results structure templates
+
 
 def run_scraper(query_parameters):
     print("running")
@@ -29,5 +30,19 @@ def run_scraper(query_parameters):
     return analysis_results
 
 
-def run_create_table(name):
-    pass
+mock_params = {
+    "keywords_list": ["the"],
+    "subreddits_list": ["uwaterloo"],
+    "sources": ["reddit"]
+}
+
+# run_scraper(mock_params)
+
+
+def run_create_table(info):
+    print("run_create_table with info ", info)
+    table_name = info["Keys"]["CampaignName"]["S"].replace(" ", "")
+    ddb.create_table(table_name)
+
+    # call run_scraper
+    # put returned data into table

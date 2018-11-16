@@ -8,7 +8,10 @@
     "keyword2"
   ],
   "reddit": {
-    "subreddits": ["subreddit1", "subreddit2"],
+    "subreddits": [
+      "subreddit1",
+      "subreddit2"
+    ],
     "subreddit1": {
       "hot": {
         "keyword1": {

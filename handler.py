@@ -2,8 +2,7 @@ import json
 import app
 
 
-def hello(event, context):
-    # todo: get query_parameters from event
+def scrape(event, context):
     print("Printing from event object: ", event["keywords_list"])
     print("Printing from event object: ", event["subreddits_list"])
     print("Printing from event object: ", event["sources"])
@@ -16,7 +15,7 @@ def hello(event, context):
     result = app.run_scraper(query_parameters)
 
     body = {
-        "message": "Hey there! The function executed successfully!",
+        "message": "Hey there! The scrape function executed successfully!",
         "result": json.dumps(result),
         "input": event
     }
@@ -29,11 +28,18 @@ def hello(event, context):
     return response
 
 
+# Triggered by putting an item into Campaigns table by enabling a DynamoDB stream on the table
+# Item is passed to this function in the event parameter
 def create_campaign_table(event, context):
-    print("DynamoDB trigger called lambda function")
-    # app.run_create_table(event["campaign_table_name"])
+    print("DynamoDB triggered lambda function")
+    print("event", event)
+
+    for record in event["Records"]:
+        if record["eventName"] == "INSERT":
+            app.run_create_table(record["dynamodb"])
+
     body = {
-        "message": "Hey there! The function executed successfully!",
+        "message": "Hey there! The create_campaign_table function executed successfully!",
         "input": event
     }
 
@@ -43,3 +49,4 @@ def create_campaign_table(event, context):
     }
 
     return response
+

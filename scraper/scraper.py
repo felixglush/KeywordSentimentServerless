@@ -1,5 +1,5 @@
 import praw
-import struct_setup as sts
+from scraper import struct_setup as sts
 
 
 def get_id_values():
