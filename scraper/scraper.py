@@ -31,19 +31,19 @@ def iter_submission_type(submission_type, type_string, keywords_list, subreddit)
         post_text = submission.selftext
         for keyword in keywords_list:
             if keyword_in_text(keyword, post_text, post_title):
-                print("found keyword in text. printing sts.submissions ", sts.submissions)
                 subreddit_branch = sts.submissions[type_string][subreddit][keyword]
                 subreddit_branch["title"].append(post_title)
-                subreddit_branch["score"].append(submission.score)  # upvotes
-                subreddit_branch["id"].append(submission.id)
+                subreddit_branch["score"].append(str(submission.score))  # upvotes
+                subreddit_branch["id"].append(str(submission.id))
                 subreddit_branch["url"].append(submission.url)
-                subreddit_branch["comms_num"].append(submission.num_comments)
-                subreddit_branch["created"].append(submission.created)  # time of creation
+                subreddit_branch["comms_num"].append(str(submission.num_comments))
+                subreddit_branch["created"].append(str(submission.created))  # time of creation
                 subreddit_branch["body"].append(post_text)  # body text
 
 
 def keyword_in_text(keyword, post_text, post_title):
-    return keyword in post_title or keyword in post_text
+    return (' ' + keyword + ' ') in (' ' + post_title + ' ') or \
+           (' ' + keyword + ' ') in (' ' + post_text + ' ')
 
 
 # Returns two dictionaries: scrapped info for the specified subreddits

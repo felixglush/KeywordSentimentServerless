@@ -52,10 +52,10 @@ def run_create_table(info):
         "sources": campaign_params_info["sources"]["SS"]
     }
 
-    #result = run_scraper(query_parameters)
+    result = run_scraper(query_parameters)
 
     # put returned data into table if it is active
-    ddb.put_item(table_name, None)
+    ddb.put_item(table_name, result)
 
 
 def run_delete_table(info):

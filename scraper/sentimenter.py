@@ -1,5 +1,6 @@
 import boto3
 import json
+from decimal import Decimal
 
 comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
 
@@ -12,21 +13,40 @@ def comprehend_sentiment(text):
     return comprehend.detect_sentiment(Text=text, LanguageCode='en')
 
 
+# No more than 25 items can be in text_list
+def batch_comprehend_sentiment(text_list):
+    return comprehend.batch_detect_sentiment(TextList=text_list)
+
+
+# text sent to Amazon Comprehend must be under 5000 bytes
+def is_text_over_limits(document):
+    return len(document.encode("utf8")) > 5000
+
+
+def filter_document_over_limits(docs):
+    return [document for document in docs if not is_text_over_limits(document)]
+
+
 def add_comprehend_result(analysis_results, subreddit, text, submission_type_string, text_type_string, keyword):
     target = analysis_results["reddit"][subreddit][submission_type_string][keyword][text_type_string]
     text_list = target["text"]
     sentiment_list = target["Sentiment"]
     sentiment_score_list = target["SentimentScore"]
-    if len(text) > 0:
+    if len(text) > 0 and not is_text_over_limits(text):
         comprehend_result = comprehend_sentiment(text)
         sentiment = comprehend_result['Sentiment']
-        sentiment_score_object = comprehend_result["SentimentScore"]
+        sentiment_score = {
+            "Mixed": str(comprehend_result["SentimentScore"]["Mixed"]),
+            "Positive": str(comprehend_result["SentimentScore"]["Positive"]),
+            "Negative": str(comprehend_result["SentimentScore"]["Negative"]),
+            "Neutral": str(comprehend_result["SentimentScore"]["Neutral"])
+        }
         text_list.append(text)
         sentiment_list.append(sentiment)
-        sentiment_score_list.append(sentiment_score_object)
+        sentiment_score_list.append(sentiment_score)
     else:
-        text_list.append("")
-        sentiment_list.append("")
+        text_list.append(" ")
+        sentiment_list.append(" ")
         sentiment_score_list.append(None)
 
 
