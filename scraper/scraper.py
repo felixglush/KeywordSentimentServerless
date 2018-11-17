@@ -30,7 +30,8 @@ def iter_submission_type(submission_type, type_string, keywords_list, subreddit)
         post_title = submission.title
         post_text = submission.selftext
         for keyword in keywords_list:
-            if keyword in post_title or keyword in post_text:
+            if keyword_in_text(keyword, post_text, post_title):
+                print("found keyword in text. printing sts.submissions ", sts.submissions)
                 subreddit_branch = sts.submissions[type_string][subreddit][keyword]
                 subreddit_branch["title"].append(post_title)
                 subreddit_branch["score"].append(submission.score)  # upvotes
@@ -41,12 +42,15 @@ def iter_submission_type(submission_type, type_string, keywords_list, subreddit)
                 subreddit_branch["body"].append(post_text)  # body text
 
 
+def keyword_in_text(keyword, post_text, post_title):
+    return keyword in post_title or keyword in post_text
+
+
 # Returns two dictionaries: scrapped info for the specified subreddits
 # and an analysis_results DS with empty lists for the scores and magnitudes of each submission
 def scrape_submissions_from_subreddits(reddit, subreddits_list, keywords_list):
     sts.submissions = {"hot": {}, "new": {}}
-    sts.analysis_results = {}
-    sts.analysis_results["reddit"] = {}
+    sts.analysis_results = {"reddit": {}}
     sts.analysis_results["reddit"]["subreddits"] = []
     for subreddit in subreddits_list:
         hot, new = get_submissions(reddit, subreddit)
@@ -55,7 +59,3 @@ def scrape_submissions_from_subreddits(reddit, subreddits_list, keywords_list):
         iter_submission_type(hot, "hot", keywords_list, subreddit)
         iter_submission_type(new, "new", keywords_list, subreddit)
     return sts.submissions, sts.analysis_results
-
-
-def get_data():
-    pass

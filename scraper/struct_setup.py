@@ -3,13 +3,14 @@ analysis_results = {}
 
 
 def setup_structure_for_subreddit(subreddit, keywords_list):
+    submissions["hot"][subreddit] = {}
+    submissions["new"][subreddit] = {}
     analysis_results["reddit"]["subreddits"].append(subreddit)
     analysis_results["reddit"][subreddit] = {}
     analysis_results["reddit"][subreddit]["hot"] = {}
     analysis_results["reddit"][subreddit]["new"] = {}
     hot_branch = analysis_results["reddit"][subreddit]["hot"]
     new_branch = analysis_results["reddit"][subreddit]["new"]
-
     for key in keywords_list:
         print("setting up keyword", key)
         hot_branch[key] = {}
@@ -45,27 +46,27 @@ def setup_structure_for_subreddit(subreddit, keywords_list):
         # {"hot":{"subreddit_name":{"Sentiment": [], "SentimentScore": [],  ...},
         # "new": {...}}}
 
-        submissions["hot"][subreddit] = {}
         submissions["hot"][subreddit][key] = {}
-        hot_keyword_object = submissions["hot"][subreddit][key]
-        hot_keyword_object["title"] = []
-        hot_keyword_object["score"] = []
-        hot_keyword_object["id"] = []
-        hot_keyword_object["url"] = []
-        hot_keyword_object["comms_num"] = []
-        hot_keyword_object["created"] = []
-        hot_keyword_object["body"] = []
+        # hot_keyword_object = submissions["hot"][subreddit][key]
+        submissions["hot"][subreddit][key]["title"] = []
+        submissions["hot"][subreddit][key]["score"] = []
+        submissions["hot"][subreddit][key]["id"] = []
+        submissions["hot"][subreddit][key]["url"] = []
+        submissions["hot"][subreddit][key]["comms_num"] = []
+        submissions["hot"][subreddit][key]["created"] = []
+        submissions["hot"][subreddit][key]["body"] = []
 
-        submissions["new"][subreddit] = {}
         submissions["new"][subreddit][key] = {}
-        new_keyword_object = submissions["new"][subreddit][key]
-        new_keyword_object["title"] = []
-        new_keyword_object["score"] = []
-        new_keyword_object["id"] = []
-        new_keyword_object["url"] = []
-        new_keyword_object["comms_num"] = []
-        new_keyword_object["created"] = []
-        new_keyword_object["body"] = []
+        # new_keyword_object = submissions["new"][subreddit][key]
+        submissions["new"][subreddit][key]["title"] = []
+        submissions["new"][subreddit][key]["score"] = []
+        submissions["new"][subreddit][key]["id"] = []
+        submissions["new"][subreddit][key]["url"] = []
+        submissions["new"][subreddit][key]["comms_num"] = []
+        submissions["new"][subreddit][key]["created"] = []
+        submissions["new"][subreddit][key]["body"] = []
+        print("Setup keyword", key, " with structure ", submissions)
+    print("structure setup for all keywords", submissions)
 
 
 def setup_structure_for_twitter():

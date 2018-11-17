@@ -3,14 +3,12 @@ import app
 
 
 def scrape(event, context):
-    print("Printing from event object: ", event["keywords_list"])
-    print("Printing from event object: ", event["subreddits_list"])
-    print("Printing from event object: ", event["sources"])
     query_parameters = {
         "keywords_list": event["keywords_list"],
         "subreddits_list": event["subreddits_list"],
         "sources": event["sources"]
     }
+    print("query_parameters", query_parameters)
 
     result = app.run_scraper(query_parameters)
 
