@@ -45,4 +45,14 @@ def run_create_table(info):
     ddb.create_table(table_name)
 
     # call run_scraper
-    # put returned data into table
+    campaign_params_info = info["NewImage"]
+    query_parameters = {
+        "keywords_list": campaign_params_info["keywords"]["SS"],
+        "subreddits_list": campaign_params_info["subreddits"]["SS"],
+        "sources": campaign_params_info["sources"]["SS"]
+    }
+
+    #result = run_scraper(query_parameters)
+
+    # put returned data into table if it is active
+    ddb.put_item(table_name, None)
