@@ -56,3 +56,9 @@ def run_create_table(info):
 
     # put returned data into table if it is active
     ddb.put_item(table_name, None)
+
+
+def run_delete_table(info):
+    print("run_delete_table with info", info)
+    table_name = info["Keys"]["CampaignName"]["S"].replace(" ", "")
+    ddb.delete_table(table_name)

@@ -30,13 +30,16 @@ def scrape(event, context):
 
 # Triggered by putting an item into Campaigns table by enabling a DynamoDB stream on the table
 # Item is passed to this function in the event parameter
-def create_campaign_table(event, context):
+def handle_campaign_table_operation(event, context):
     print("DynamoDB triggered lambda function")
     print("event", event)
 
     for record in event["Records"]:
+        print("record", record)
         if record["eventName"] == "INSERT":
             app.run_create_table(record["dynamodb"])
+        elif record["eventName"] == "REMOVE":
+            app.run_delete_table(record["dynamodb"])
 
     body = {
         "message": "Hey there! The create_campaign_table function executed successfully!",

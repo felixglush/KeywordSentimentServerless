@@ -58,7 +58,7 @@ functions:
   hello:
     handler: handler.scrape
   createCampaignTable:
-    handler: handler.create_campaign_table
+    handler: handler.handle_campaign_table_operation
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
