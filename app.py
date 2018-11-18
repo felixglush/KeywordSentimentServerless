@@ -2,10 +2,25 @@ from scraper import scraper
 from scraper import sentimenter
 from db import accessor as ddb
 
+# TODO
+# Add twitter
+# Categorize by date
+# Stream new submissions to lambda
+# Implement batch Comprehend calls
+# Increase number of submissions analyzed (PRAW subreddit submissions query limit is 1000)
+# Put items into campaign's table by date (each Item is a separate day)
+# Create Lambda function to analyze data (overall sentiment by date)
+# Store that information into a Sentiment_<CampaignName> table
+# Index into ElasticSearch and continuously index new/streamed data
+# Create UI element to specify items to get by date (submissions show in list) from ElasticSearch
+# Show the date's Submissions and overall sentiment when a date is specified
+# Prettify UI
+# Flag posts requiring attention
+
 # See the *_scratch.json files for the submissions and analysis_results structure templates
 
 
-def run_scraper(query_parameters):
+def run_scraper_and_analyzer(query_parameters):
     print("running")
     sources = query_parameters["sources"]
     keywords_list = query_parameters["keywords_list"]
@@ -52,7 +67,7 @@ def run_create_table(info):
         "sources": campaign_params_info["sources"]["SS"]
     }
 
-    result = run_scraper(query_parameters)
+    result = run_scraper_and_analyzer(query_parameters)
 
     # put returned data into table if it is active
     ddb.put_item(table_name, result)

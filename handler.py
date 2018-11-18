@@ -10,7 +10,7 @@ def scrape(event, context):
     }
     print("query_parameters", query_parameters)
 
-    result = app.run_scraper(query_parameters)
+    result = app.run_scraper_and_analyzer(query_parameters)
 
     body = {
         "message": "Hey there! The scrape function executed successfully!",
