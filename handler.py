@@ -26,7 +26,7 @@ def scrape(event, context):
     return response
 
 
-# Triggered by putting an item into Campaigns table by enabling a DynamoDB stream on the table
+# Triggered by putting/deleting an item in Campaigns table by enabling a DynamoDB stream on the table
 # Item is passed to this function in the event parameter
 def handle_campaign_table_operation(event, context):
     print("DynamoDB triggered lambda function")
@@ -35,9 +35,9 @@ def handle_campaign_table_operation(event, context):
     for record in event["Records"]:
         print("record", record)
         if record["eventName"] == "INSERT":
-            app.run_create_table(record["dynamodb"])
+            app.run_create_campaign_table(record["dynamodb"])
         elif record["eventName"] == "REMOVE":
-            app.run_delete_table(record["dynamodb"])
+            app.run_delete_campaign_table(record["dynamodb"])
 
     body = {
         "message": "Hey there! The create_campaign_table function executed successfully!",
@@ -51,3 +51,11 @@ def handle_campaign_table_operation(event, context):
 
     return response
 
+
+def process_tweets(event, context):
+    print("process_tweets event", event)
+    #app.process_tweets(event)
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from processTweets lambda!')
+    }

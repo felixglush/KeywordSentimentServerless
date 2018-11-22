@@ -1,6 +1,5 @@
 import boto3
 import json
-from decimal import Decimal
 
 comprehend = boto3.client(service_name='comprehend', region_name='us-east-1')
 
