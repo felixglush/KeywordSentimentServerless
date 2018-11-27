@@ -10,7 +10,7 @@ def scrape(event, context):
     }
     print("query_parameters", query_parameters)
 
-    result = app.run_scraper_and_analyzer(query_parameters)
+    result = app.run_scraper(query_parameters)
 
     body = {
         "message": "Hey there! The scrape function executed successfully!",
@@ -54,7 +54,8 @@ def handle_campaign_table_operation(event, context):
 
 def process_tweets(event, context):
     print("process_tweets event", event)
-    #app.process_tweets(event)
+    app.process_tweets(event)
+
     return {
         'statusCode': 200,
         'body': json.dumps('Hello from processTweets lambda!')

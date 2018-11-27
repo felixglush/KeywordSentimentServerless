@@ -13,40 +13,36 @@ def comprehend_sentiment(text):
 
 
 # No more than 25 items can be in text_list
-def batch_comprehend_sentiment(text_list):
-    return comprehend.batch_detect_sentiment(TextList=text_list)
+def start_sentiment_detection_job(text_list):
+    return comprehend.start_sentiment_detection_job(
+        InputDataConfig={
+            'S3Uri': 'string',
+            'InputFormat': 'ONE_DOC_PER_LINE'
+        },
+        OutputDataConfig={
+            'S3Uri': 'string'
+        },
+        DataAccessRoleArn='String',
+        JobName='TwitterRedditSentimentDetectionJob',
+        LanguageCode='en'
+    )
 
 
 # text sent to Amazon Comprehend must be under 5000 bytes
-def is_text_over_limits(document):
-    return len(document.encode("utf8")) > 5000
+def is_text_within_limits(document):
+    return len(document.encode("utf8")) <= 5000 and len(document) > 0
 
 
-def filter_document_over_limits(docs):
-    return [document for document in docs if not is_text_over_limits(document)]
+def document_within_limits(text1, text2):
+    return is_text_within_limits(text1) and is_text_within_limits(text2)
 
 
-def add_comprehend_result(analysis_results, subreddit, text, submission_type_string, text_type_string, keyword):
+def add_comprehend_result(analysis_results, subreddit, docs, submission_type_string, text_type_string, keyword):
     target = analysis_results["reddit"][subreddit][submission_type_string][keyword][text_type_string]
     text_list = target["text"]
     sentiment_list = target["Sentiment"]
     sentiment_score_list = target["SentimentScore"]
-    if len(text) > 0 and not is_text_over_limits(text):
-        comprehend_result = comprehend_sentiment(text)
-        sentiment = comprehend_result['Sentiment']
-        sentiment_score = {
-            "Mixed": str(comprehend_result["SentimentScore"]["Mixed"]),
-            "Positive": str(comprehend_result["SentimentScore"]["Positive"]),
-            "Negative": str(comprehend_result["SentimentScore"]["Negative"]),
-            "Neutral": str(comprehend_result["SentimentScore"]["Neutral"])
-        }
-        text_list.append(text)
-        sentiment_list.append(sentiment)
-        sentiment_score_list.append(sentiment_score)
-    else:
-        text_list.append(" ")
-        sentiment_list.append(" ")
-        sentiment_score_list.append(None)
+    response = start_sentiment_detection_job(docs)
 
 
 def add_auxiliary_data(analysis_results, key, submission_type, submission_type_string, subreddit):
@@ -63,16 +59,12 @@ def populate_analysis_results(submission_type, submission_type_string, analysis_
             titles = submission_type[subreddit][key]["title"]
             bodies = submission_type[subreddit][key]["body"]
             add_auxiliary_data(analysis_results, key, submission_type, submission_type_string, subreddit)
-            for title_text in titles:
-                add_comprehend_result(analysis_results, subreddit, title_text,
-                                      submission_type_string, "title", key)
 
-            for body_text in bodies:
-                add_comprehend_result(analysis_results, subreddit, body_text,
-                                      submission_type_string, "body", key)
+            add_comprehend_result(analysis_results, subreddit, titles, submission_type_string, "title", key)
+            add_comprehend_result(analysis_results, subreddit, bodies, submission_type_string, "body", key)
 
 
-def analyze(submissions, analysis_results):
+def analyze_reddit(submissions, analysis_results):
     hot = submissions["hot"]
     new = submissions["new"]
     populate_analysis_results(hot, "hot", analysis_results)

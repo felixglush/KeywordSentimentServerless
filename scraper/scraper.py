@@ -1,5 +1,6 @@
 import praw
 from scraper import struct_setup as sts
+from scraper import sentimenter
 
 
 def get_id_values():
@@ -29,16 +30,17 @@ def iter_submission_type(submission_type, type_string, keywords_list, subreddit)
     for submission in submission_type:
         post_title = submission.title
         post_text = submission.selftext
-        for keyword in keywords_list:
-            if keyword_in_text(keyword, post_text, post_title):
-                subreddit_branch = sts.submissions[type_string][subreddit][keyword]
-                subreddit_branch["title"].append(post_title)
-                subreddit_branch["score"].append(str(submission.score))  # upvotes
-                subreddit_branch["id"].append(str(submission.id))
-                subreddit_branch["url"].append(submission.url)
-                subreddit_branch["comms_num"].append(str(submission.num_comments))
-                subreddit_branch["created"].append(str(submission.created))  # time of creation
-                subreddit_branch["body"].append(post_text)  # body text
+        if sentimenter.document_within_limits(post_title, post_text):
+            for keyword in keywords_list:
+                if keyword_in_text(keyword, post_text, post_title):
+                    subreddit_branch = sts.submissions[type_string][subreddit][keyword]
+                    subreddit_branch["title"].append(post_title)
+                    subreddit_branch["score"].append(str(submission.score))  # upvotes
+                    subreddit_branch["id"].append(str(submission.id))
+                    subreddit_branch["url"].append(submission.url)
+                    subreddit_branch["comms_num"].append(str(submission.num_comments))
+                    subreddit_branch["created"].append(str(submission.created))  # time of creation
+                    subreddit_branch["body"].append(post_text)  # body text
 
 
 def keyword_in_text(keyword, post_text, post_title):

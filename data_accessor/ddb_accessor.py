@@ -5,10 +5,6 @@ import boto3
 ddb_client = boto3.client('dynamodb', region_name='us-east-1')
 ddb_resource = boto3.resource('dynamodb', region_name='us-east-1')
 
-# TODO
-# enable stream on campaign table
-# specify event source (newly created campaign table) for lambda function which sends new item to frontend
-
 
 def table_exists(table_name):
     response = ddb_client.list_tables()
@@ -23,24 +19,25 @@ def table_exists(table_name):
 def create_table(table_name):
     if not table_exists(table_name):
         print("creating table", table_name)
-        ddb_client.create_table(TableName=table_name,
-                                KeySchema=[
-                                    {
-                                        'AttributeName': 'id',
-                                        'KeyType': 'HASH'  # Partition key
-                                    }
-                                ],
-                                AttributeDefinitions=[
-                                    {
-                                        'AttributeName': 'id',
-                                        'AttributeType': 'S'
-                                    },
-                                ],
-                                ProvisionedThroughput={
-                                    'ReadCapacityUnits': 10,
-                                    'WriteCapacityUnits': 10
-                                },
-                                )
+        ddb_client.create_table(
+            TableName=table_name,
+            KeySchema=[
+                {
+                    'AttributeName': 'id',
+                    'KeyType': 'HASH'  # Partition key
+                }
+            ],
+            AttributeDefinitions=[
+                {
+                    'AttributeName': 'id',
+                    'AttributeType': 'S'
+                },
+            ],
+            ProvisionedThroughput={
+                'ReadCapacityUnits': 10,
+                'WriteCapacityUnits': 10
+            },
+        )
 
 
 def delete_table_when_active(table_name):
@@ -59,17 +56,25 @@ def delete_table(table_name):
     delete_table_when_active(table_name)  # Cannot delete when table is updating, so make sure it is not
 
 
-def create_id_for_item():
-    id_num = uuid.uuid4()
-    return str(id_num)
-
-
-def put_item(table_name, result):
-    print("result to put into ddb", result)
+def put_item(table_name, item):
+    print("result to put into ddb", item)
     wait_create_table(table_name, 5, 5)
     table = ddb_resource.Table(table_name)
-    id_str = create_id_for_item(table)
-    table.put_item(Item={"id": id_str, "result": result})
+    id_str = create_id_for_item()
+    table.put_item(Item={"id": id_str, "item": item})
+
+
+def batch_put_posts(posts, source):
+    table = ddb_resource.Table("Posts")
+    with table.batch_writer() as batch:
+        for post in posts:
+            batch.put_item(Item={
+                "PostId": post["id"],
+                "Post": post,
+                "Source": source,
+                "Sentiment": "placeholder",
+                "SentimentScore": {}}
+            )
 
 
 def wait_create_table(table_name, delay=25, max_attempts=10):
@@ -79,3 +84,7 @@ def wait_create_table(table_name, delay=25, max_attempts=10):
                     'Delay': delay,
                     'MaxAttempts': max_attempts
                 })
+
+
+def create_id_for_item():
+    return str(uuid.uuid4())
