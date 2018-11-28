@@ -12,18 +12,18 @@ def comprehend_sentiment(text):
     return comprehend.detect_sentiment(Text=text, LanguageCode='en')
 
 
-# No more than 25 items can be in text_list
-def start_sentiment_detection_job(text_list):
+def start_sentiment_detection_job():
+
     return comprehend.start_sentiment_detection_job(
         InputDataConfig={
-            'S3Uri': 'string',
+            'S3Uri': 's3://keyword-tracker-analysis-input/lines',
             'InputFormat': 'ONE_DOC_PER_LINE'
         },
         OutputDataConfig={
-            'S3Uri': 'string'
+            'S3Uri': 's3://keyword-tracker-analysis-output/lines'
         },
-        DataAccessRoleArn='String',
-        JobName='TwitterRedditSentimentDetectionJob',
+        DataAccessRoleArn='arn:aws:iam::433181616955:role/S3DataAccessRoleForComprehend',
+        JobName='KeywordSentimentDetectionJob',
         LanguageCode='en'
     )
 
@@ -42,7 +42,7 @@ def add_comprehend_result(analysis_results, subreddit, docs, submission_type_str
     text_list = target["text"]
     sentiment_list = target["Sentiment"]
     sentiment_score_list = target["SentimentScore"]
-    response = start_sentiment_detection_job(docs)
+    response = start_sentiment_detection_job()
 
 
 def add_auxiliary_data(analysis_results, key, submission_type, submission_type_string, subreddit):

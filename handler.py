@@ -2,61 +2,38 @@ import json
 import app
 
 
-def scrape(event, context):
-    query_parameters = {
-        "keywords_list": event["keywords_list"],
-        "subreddits_list": event["subreddits_list"],
-        "sources": event["sources"]
-    }
-    print("query_parameters", query_parameters)
-
-    result = app.run_scraper(query_parameters)
-
-    body = {
-        "message": "Hey there! The scrape function executed successfully!",
-        "result": json.dumps(result),
-        "input": event
-    }
-
-    response = {
-        "statusCode": 200,
-        "body": json.dumps(body)
-    }
-
-    return response
+def scrape_reddit(event, context):
+    log_trigger(event, "scrape_reddit")
+    result = app.handle_scrape_reddit(event)
+    return create_ok_response(event, result, "scrape_reddit")
 
 
 # Triggered by putting/deleting an item in Campaigns table by enabling a DynamoDB stream on the table
 # Item is passed to this function in the event parameter
 def handle_campaign_table_operation(event, context):
-    print("DynamoDB triggered lambda function")
-    print("event", event)
+    log_trigger(event, "handle_campaign_table_operation", "A DynamoDB event trigger")
+    app.handle_campaign_table_operation(event)
+    return create_ok_response(event, "handle_campaign_table_operation")
 
-    for record in event["Records"]:
-        print("record", record)
-        if record["eventName"] == "INSERT":
-            app.run_create_campaign_table(record["dynamodb"])
-        elif record["eventName"] == "REMOVE":
-            app.run_delete_campaign_table(record["dynamodb"])
 
+def process_tweets(event, context):
+    log_trigger(event, "process_tweets")
+    app.process_tweets(event)
+    return create_ok_response(event, "process_tweets")
+
+
+def create_ok_response(event, result=None, func_name="lambda"):
     body = {
-        "message": "Hey there! The create_campaign_table function executed successfully!",
+        "message": "Hey there! The " + func_name + " function executed successfully!",
+        "result": json.dumps(result),
         "input": event
     }
-
     response = {
         "statusCode": 200,
         "body": json.dumps(body)
     }
-
     return response
 
 
-def process_tweets(event, context):
-    print("process_tweets event", event)
-    app.process_tweets(event)
-
-    return {
-        'statusCode': 200,
-        'body': json.dumps('Hello from processTweets lambda!')
-    }
+def log_trigger(event, func_name, who=""):
+    print("{} invoked lambda {} function with event {}".format(who, func_name, event))

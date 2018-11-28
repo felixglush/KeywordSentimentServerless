@@ -56,7 +56,7 @@ provider:
 
 functions:
   hello:
-    handler: handler.scrape
+    handler: handler.scrape_reddit
   createCampaignTable:
     handler: handler.handle_campaign_table_operation
   processTweets:

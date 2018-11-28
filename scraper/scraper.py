@@ -19,8 +19,8 @@ def init_reddit_scraper():
                        password=password)
 
 
-def get_submissions(reddit, subreddit_name):
-    subreddit = reddit.subreddit(subreddit_name)
+def get_submissions(reddit_client, subreddit_name):
+    subreddit = reddit_client.subreddit(subreddit_name)
     subreddit_hot = subreddit.hot()
     subreddit_new = subreddit.new()
     return subreddit_hot, subreddit_new
@@ -50,12 +50,12 @@ def keyword_in_text(keyword, post_text, post_title):
 
 # Returns two dictionaries: scrapped info for the specified subreddits
 # and an analysis_results DS with empty lists for the scores and magnitudes of each submission
-def scrape_submissions_from_subreddits(reddit, subreddits_list, keywords_list):
+def scrape_submissions_from_subreddits(reddit_client, subreddits_list, keywords_list):
     sts.submissions = {"hot": {}, "new": {}}
     sts.analysis_results = {"reddit": {}}
     sts.analysis_results["reddit"]["subreddits"] = []
     for subreddit in subreddits_list:
-        hot, new = get_submissions(reddit, subreddit)
+        hot, new = get_submissions(reddit_client, subreddit)
         data = {"subreddit": subreddit, "keywords_list": keywords_list}
         sts.setup_structure("reddit", data)
         iter_submission_type(hot, "hot", keywords_list, subreddit)
