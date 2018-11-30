@@ -1,6 +1,6 @@
 import praw
+from parser import parse_reddit_submissions
 from scraper import struct_setup as sts
-from scraper import sentimenter
 
 
 def get_id_values():
@@ -26,23 +26,6 @@ def get_submissions(reddit_client, subreddit_name):
     return subreddit_hot, subreddit_new
 
 
-def iter_submission_type(submission_type, type_string, keywords_list, subreddit):
-    for submission in submission_type:
-        post_title = submission.title
-        post_text = submission.selftext
-        if sentimenter.document_within_limits(post_title, post_text):
-            for keyword in keywords_list:
-                if keyword_in_text(keyword, post_text, post_title):
-                    subreddit_branch = sts.submissions[type_string][subreddit][keyword]
-                    subreddit_branch["title"].append(post_title)
-                    subreddit_branch["score"].append(str(submission.score))  # upvotes
-                    subreddit_branch["id"].append(str(submission.id))
-                    subreddit_branch["url"].append(submission.url)
-                    subreddit_branch["comms_num"].append(str(submission.num_comments))
-                    subreddit_branch["created"].append(str(submission.created))  # time of creation
-                    subreddit_branch["body"].append(post_text)  # body text
-
-
 def keyword_in_text(keyword, post_text, post_title):
     return (' ' + keyword + ' ') in (' ' + post_title + ' ') or \
            (' ' + keyword + ' ') in (' ' + post_text + ' ')
@@ -52,12 +35,12 @@ def keyword_in_text(keyword, post_text, post_title):
 # and an analysis_results DS with empty lists for the scores and magnitudes of each submission
 def scrape_submissions_from_subreddits(reddit_client, subreddits_list, keywords_list):
     sts.submissions = {"hot": {}, "new": {}}
-    sts.analysis_results = {"reddit": {}}
-    sts.analysis_results["reddit"]["subreddits"] = []
+    # sts.analysis_results = {"reddit": {}}
+    # sts.analysis_results["reddit"]["subreddits"] = []
     for subreddit in subreddits_list:
         hot, new = get_submissions(reddit_client, subreddit)
         data = {"subreddit": subreddit, "keywords_list": keywords_list}
         sts.setup_structure("reddit", data)
-        iter_submission_type(hot, "hot", keywords_list, subreddit)
-        iter_submission_type(new, "new", keywords_list, subreddit)
+        parse_reddit_submissions(hot, "hot", keywords_list, subreddit)
+        parse_reddit_submissions(new, "new", keywords_list, subreddit)
     return sts.submissions, sts.analysis_results

@@ -1,7 +1,8 @@
-from scraper import scraper
+import parser
+from scraper import reddit_scraper
 from data_accessor import ddb_accessor as ddb
+import sentimenter
 import boto3
-import json
 
 # TODO
 # done. Add twitter
@@ -18,12 +19,9 @@ import json
 # Prettify UI
 # Flag posts requiring attention
 
-# See the *_scratch.json files for the submissions and analysis_results structure templates
-
-lambda_client = boto3.client(service_name='lambda', region_name='us-east-1')
-
 
 def invoke_reddit_scraper_lambda(query_parameters):
+    lambda_client = boto3.client(service_name='lambda', region_name='us-east-1')
     lambda_client.invoke(
         FunctionName="arn:aws:lambda:us-east-1:433181616955:function:serverless-keywordtracker-dev-hello",
         InvocationType="Event",
@@ -41,6 +39,7 @@ def handle_scrape_reddit(event):
     print("query_parameters", query_parameters)
 
     posts = run_reddit_scraper(query_parameters)
+    sentimenter.analyze_async_job(posts)  # modifies posts
     batch_put_posts(posts, "reddit")
 
     # put PostIds into <campaign_name> table
@@ -52,20 +51,16 @@ def handle_scrape_reddit(event):
 
 
 def run_reddit_scraper(query_parameters):
-    print("running")
-    sources = query_parameters["sources"]
-    keywords_list = query_parameters["keywords_list"]
+    print("running scraper")
     subreddits_list = []
-    if "reddit" in sources:
+    if "reddit" in query_parameters["sources"]:
         subreddits_list = query_parameters["subreddits_list"]
 
-    # Scrape the data from sources
-    # twitter is polled using a lambda function which triggers my processTweets lambda function when it finds new tweets
-    print("scraping")
-    reddit_client = scraper.init_reddit_scraper()
-    submissions = scraper.scrape_submissions_from_subreddits(reddit_client, subreddits_list, keywords_list)
+    reddit_client = reddit_scraper.init_reddit_scraper()
+    submissions = reddit_scraper.scrape_submissions_from_subreddits(reddit_client, subreddits_list,
+                                                                    query_parameters["keywords_list"])
 
-    print("submissions", submissions)
+    print("reddit submissions", submissions)
     return submissions
 
 
@@ -75,22 +70,10 @@ def handle_campaign_table_operation(event):
         if record["eventName"] == "INSERT":
             table_name = record["dynamodb"]["Keys"]["CampaignName"]["S"].replace(" ", "")
             ddb.create_table(table_name)
-            query_parameters = extract_campaign_query_params(record["dynamodb"])
+            query_parameters = parser.extract_campaign_query_params(record["dynamodb"])
             invoke_reddit_scraper_lambda(query_parameters)
         elif record["eventName"] == "REMOVE":
             run_delete_campaign_table(record["dynamodb"])
-
-
-def extract_campaign_query_params(record):
-    table_name = record["Keys"]["CampaignName"]["S"]
-    campaign_params_info = record["NewImage"]
-    query_parameters = {
-        "campaign_name": table_name,
-        "keywords_list": campaign_params_info["keywords"]["SS"],
-        "subreddits_list": campaign_params_info["subreddits"]["SS"],
-        "sources": campaign_params_info["sources"]["SS"]
-    }
-    return query_parameters
 
 
 def run_delete_campaign_table(info):
@@ -100,24 +83,9 @@ def run_delete_campaign_table(info):
 
 
 def process_tweets(tweet_data):
-    tweets_structure = parse_tweets(tweet_data)
+    tweets_structure = parser.parse_twitter_tweets(tweet_data)
+    sentimenter.analyze_tweets(tweets_structure)  # will modify tweets_structure by inputting sentiment data
     batch_put_posts(tweets_structure, "twitter")
-
-
-def parse_tweets(tweet_data):
-    tweets_structure = []
-    for item in tweet_data:
-        jsondata = json.loads(item)  # json.loads() decodes the JSON
-        if jsondata["lang"] == 'en':
-            tweet = {
-                "text": jsondata["text"],
-                "date": jsondata["created_at"],  # UTC time
-                "user_screen_name": jsondata["user"]["screen_name"],
-                "id": jsondata["id_str"],  # will be used in ddb as the PostId
-                "truncated": jsondata["truncated"],
-            }
-            tweets_structure.append(tweet)
-    print(tweets_structure)
     return tweets_structure
 
 

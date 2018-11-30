@@ -68,22 +68,21 @@ def batch_put_ids(post_ids, table_name):
     table = ddb_resource.Table(table_name)
     with table.batch_writer() as batch:
         for post_id in post_ids:
-            batch.put_item(Item={
-                "id": post_id,
-            }
-            )
+            batch.put_item(Item={"id": post_id})
 
 
 def batch_put_posts(posts, source):
     table = ddb_resource.Table("Posts")
     with table.batch_writer() as batch:
         for post in posts:
-            batch.put_item(Item={
-                "PostId": post["id"],
-                "Post": post,
-                "Source": source,
-                "IsAnalyzed": False,
-            }
+            analyzed = post["sentiment"] is not None
+            batch.put_item(
+                Item={
+                    "PostId": post["id"],
+                    "Post": post,
+                    "Source": source,
+                    "IsAnalyzed": analyzed,
+                }
             )
 
 
@@ -98,4 +97,3 @@ def wait_create_table(table_name, delay=25, max_attempts=10):
 
 def create_id_for_item():
     return str(uuid.uuid4())
-

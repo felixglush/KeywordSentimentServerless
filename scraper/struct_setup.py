@@ -47,34 +47,28 @@ def setup_structure_for_subreddit(subreddit, keywords_list):
         # "new": {...}}}
 
         submissions["hot"][subreddit][key] = {}
-        # hot_keyword_object = submissions["hot"][subreddit][key]
-        submissions["hot"][subreddit][key]["title"] = []
-        submissions["hot"][subreddit][key]["score"] = []
-        submissions["hot"][subreddit][key]["id"] = []
-        submissions["hot"][subreddit][key]["url"] = []
-        submissions["hot"][subreddit][key]["comms_num"] = []
-        submissions["hot"][subreddit][key]["created"] = []
-        submissions["hot"][subreddit][key]["body"] = []
+        submissions["hot"][subreddit][key]["posts"] = []
+        # submissions["hot"][subreddit][key]["title"] = []
+        # submissions["hot"][subreddit][key]["score"] = []
+        # submissions["hot"][subreddit][key]["id"] = []
+        # submissions["hot"][subreddit][key]["url"] = []
+        # submissions["hot"][subreddit][key]["comms_num"] = []
+        # submissions["hot"][subreddit][key]["created"] = []
+        # submissions["hot"][subreddit][key]["body"] = []
 
         submissions["new"][subreddit][key] = {}
-        # new_keyword_object = submissions["new"][subreddit][key]
-        submissions["new"][subreddit][key]["title"] = []
-        submissions["new"][subreddit][key]["score"] = []
-        submissions["new"][subreddit][key]["id"] = []
-        submissions["new"][subreddit][key]["url"] = []
-        submissions["new"][subreddit][key]["comms_num"] = []
-        submissions["new"][subreddit][key]["created"] = []
-        submissions["new"][subreddit][key]["body"] = []
+        submissions["new"][subreddit][key]["posts"] = []
+        # submissions["new"][subreddit][key]["title"] = []
+        # submissions["new"][subreddit][key]["score"] = []
+        # submissions["new"][subreddit][key]["id"] = []
+        # submissions["new"][subreddit][key]["url"] = []
+        # submissions["new"][subreddit][key]["comms_num"] = []
+        # submissions["new"][subreddit][key]["created"] = []
+        # submissions["new"][subreddit][key]["body"] = []
         print("Setup keyword", key, " with structure ", submissions)
     print("structure setup for all keywords", submissions)
-
-
-def setup_structure_for_twitter():
-    pass
 
 
 def setup_structure(source, data):
     if source == "reddit":
         setup_structure_for_subreddit(data["subreddit"], data["keywords_list"])
-    elif source == "twitter":
-        setup_structure_for_twitter()
