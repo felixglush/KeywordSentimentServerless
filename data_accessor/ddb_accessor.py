@@ -60,7 +60,7 @@ def put_item(table_name, item):
     print("result to put into ddb", item)
     wait_create_table(table_name, 5, 5)
     table = ddb_resource.Table(table_name)
-    id_str = create_id_for_item()
+    id_str = create_uuid_for_item()
     table.put_item(Item={"id": id_str, "item": item})
 
 
@@ -95,5 +95,5 @@ def wait_create_table(table_name, delay=25, max_attempts=10):
                 })
 
 
-def create_id_for_item():
+def create_uuid_for_item():
     return str(uuid.uuid4())

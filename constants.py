@@ -5,3 +5,6 @@ s3_data_access_role_arn = 'arn:aws:iam::433181616955:role/S3DataAccessRoleForCom
 s3_comprehend_sentiment_detection_job_name = 'KeywordSentimentDetectionJob'
 s3_document_filename = "texts.txt"
 s3_id_filename = "ids.txt"
+
+
+sleep_time_for_campaign_poll = 15  # seconds

@@ -1,5 +1,5 @@
 import praw
-from parser import parse_reddit_submissions
+import parser
 from scraper import struct_setup as sts
 
 
@@ -41,6 +41,6 @@ def scrape_submissions_from_subreddits(reddit_client, subreddits_list, keywords_
         hot, new = get_submissions(reddit_client, subreddit)
         data = {"subreddit": subreddit, "keywords_list": keywords_list}
         sts.setup_structure("reddit", data)
-        parse_reddit_submissions(hot, "hot", keywords_list, subreddit)
-        parse_reddit_submissions(new, "new", keywords_list, subreddit)
+        parser.parse_reddit_submissions(hot, "hot", keywords_list, subreddit)
+        parser.parse_reddit_submissions(new, "new", keywords_list, subreddit)
     return sts.submissions, sts.analysis_results

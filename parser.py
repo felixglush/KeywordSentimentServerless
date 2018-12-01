@@ -1,7 +1,7 @@
 import json
 from scraper import struct_setup as sts
 import sentimenter
-from scraper.reddit_scraper import keyword_in_text
+from scraper import reddit_scraper
 
 
 def parse_twitter_tweets(tweet_data):
@@ -26,7 +26,7 @@ def parse_reddit_submissions(submission_type, type_string, keywords_list, subred
         post_title, post_text = submission.title, submission.selftext
         if sentimenter.documents_within_limits(post_title, post_text):
             for keyword in keywords_list:
-                if keyword_in_text(keyword, post_text, post_title):
+                if reddit_scraper.keyword_in_text(keyword, post_text, post_title):
                     post = {
                         "title": post_title,
                         "body": post_text,
@@ -63,10 +63,10 @@ def post_already_exists(post_id, posts):
 
 
 def extract_campaign_query_params(record):
-    table_name = record["Keys"]["CampaignName"]["S"]
+    campain_name = record["Keys"]["CampaignName"]["S"]
     campaign_params_info = record["NewImage"]
     query_parameters = {
-        "campaign_name": table_name,
+        "campaign_name": campain_name,
         "keywords_list": campaign_params_info["keywords"]["SS"],
         "subreddits_list": campaign_params_info["subreddits"]["SS"],
         "sources": campaign_params_info["sources"]["SS"]

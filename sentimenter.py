@@ -7,7 +7,7 @@ comprehend_client = boto3.client(service_name='comprehend', region_name='us-east
 def analyze_async_job(posts):
     text_file, ids_file = s3.setup_files(posts)
     s3.upload_files(constants.s3_input_bucket, text_file, ids_file)
-    start_sentiment_detection_job()
+    # start_sentiment_detection_job()
 
 
 def start_sentiment_detection_job():

@@ -1,7 +1,9 @@
+import constants
 import parser
 from scraper import reddit_scraper
 from data_accessor import ddb_accessor as ddb
 import sentimenter
+import time
 import boto3
 
 # TODO
@@ -43,8 +45,8 @@ def handle_scrape_reddit(event):
     batch_put_posts(posts, "reddit")
 
     # put PostIds into <campaign_name> table
-    post_ids = [post["id"] for post in posts]
     table_name = query_parameters["campaign_name"].replace(" ", "")
+    post_ids = [post["id"] for post in posts]
     batch_put_ids(post_ids, table_name)
 
     return posts
@@ -86,6 +88,9 @@ def process_tweets(tweet_data):
     tweets_structure = parser.parse_twitter_tweets(tweet_data)
     sentimenter.analyze_tweets(tweets_structure)  # will modify tweets_structure by inputting sentiment data
     batch_put_posts(tweets_structure, "twitter")
+
+    # put tweet ids into the <campaign_name> table
+
     return tweets_structure
 
 
@@ -95,3 +100,44 @@ def batch_put_posts(posts, source):
 
 def batch_put_ids(post_ids, table_name):
     ddb.batch_put_ids(post_ids, table_name)
+
+
+def iterate_and_poll_through_campaigns():
+    lambda_client = boto3.client(service_name='lambda', region_name='us-east-1')
+    ddb_resource = boto3.resource('dynamodb', region_name='us-east-1')
+    campaign_table = ddb_resource.Table("Campaigns")
+    response = campaign_table.scan()
+    items = response["Items"]
+    count = response["Count"]
+    lambda_client.update_function_configuration(
+        FunctionName='function:serverless-keywordtracker-dev-iteratePollThroughCampaigns',
+        Timeout=(count * constants.sleep_time_for_campaign_poll)
+    )
+
+    for campaign in items:
+        query_parameters = {
+            "campaign_name": campaign["CampaignName"],
+            "sources": campaign["sources"],
+            "keywords": campaign["keywords"],
+            "subreddits": campaign["subreddits"]
+        }
+        print("Campaign parameters", query_parameters)
+
+        # update twitter poller lambda function configuration
+        search_text = ' OR '.join(query_parameters["keywords"])
+        lambda_client.update_function_configuration(
+            FunctionName='aws-serverless-repository-aws-TwitterSearchPoller-6GH8Y61OUDGH',
+            Environment={
+                'Variables': {
+                    'SEARCH_TEXT': search_text
+                }
+            }
+        )
+
+        cloudwatch_client = boto3.client('events')
+        cloudwatch_client.enable_rule(
+            Name='serverless-keywordtracker-IteratePollThroughCampai-15HLY2A82PWN'
+        )
+
+        # now the poller will automatically invoke the processTweets lambda function
+        time.sleep(constants.sleep_time_for_campaign_poll)

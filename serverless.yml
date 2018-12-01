@@ -61,6 +61,10 @@ functions:
     handler: handler.handle_campaign_table_operation
   processTweets:
     handler: handler.process_tweets
+  iteratePollThroughCampaigns:
+    handler: handler.iterate_poll_through_campaigns
+    events:
+      - schedule: rate(1 minute)
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
