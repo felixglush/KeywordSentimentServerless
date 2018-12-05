@@ -21,6 +21,9 @@ def parse_twitter_tweets(tweet_data):
     return tweets_structure
 
 
+reddit_posts_list = []
+
+
 def parse_reddit_submissions(submission_type, type_string, keywords_list, subreddit):
     for submission in submission_type:
         post_title, post_text = submission.title, submission.selftext
@@ -45,14 +48,7 @@ def parse_reddit_submissions(submission_type, type_string, keywords_list, subred
                     post["filters"].append(type_string)
                     if not post_already_exists(submission.id, subreddit_branch_posts):
                         subreddit_branch_posts.append(post)
-
-                    # subreddit_branch["title"].append(post_title)
-                    # subreddit_branch["score"].append(str(submission.score))  # upvotes
-                    # subreddit_branch["id"].append(str(submission.id))
-                    # subreddit_branch["url"].append(submission.url)
-                    # subreddit_branch["comms_num"].append(str(submission.num_comments))
-                    # subreddit_branch["created"].append(str(submission.created))  # time of creation
-                    # subreddit_branch["body"].append(post_text)  # body text
+                        reddit_posts_list.append(post)
 
 
 def post_already_exists(post_id, posts):

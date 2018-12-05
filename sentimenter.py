@@ -5,19 +5,20 @@ comprehend_client = boto3.client(service_name='comprehend', region_name='us-east
 
 
 def analyze_async_job(posts):
-    text_file, ids_file = s3.setup_files(posts)
-    s3.upload_files(constants.s3_input_bucket, text_file, ids_file)
-    # start_sentiment_detection_job()
+    print("setting up async job")
+    text_container, id_container = s3.setup_docs_for_upload(posts)
+    s3.upload_collection(constants.s3_input_bucket_name, text_container, id_container)
+    start_sentiment_detection_job()
 
 
 def start_sentiment_detection_job():
     return comprehend_client.start_sentiment_detection_job(
         InputDataConfig={
-            'S3Uri': constants.s3_input_bucket + constants.s3_bucket_texts,
+            'S3Uri': constants.s3_input_bucket,
             'InputFormat': 'ONE_DOC_PER_LINE'
         },
         OutputDataConfig={
-            'S3Uri': constants.s3_output_bucket + constants.s3_bucket_texts
+            'S3Uri': constants.s3_output_bucket
         },
         DataAccessRoleArn=constants.s3_data_access_role_arn,
         JobName=constants.s3_comprehend_sentiment_detection_job_name,

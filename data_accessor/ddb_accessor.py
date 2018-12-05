@@ -65,6 +65,7 @@ def put_item(table_name, item):
 
 
 def batch_put_ids(post_ids, table_name):
+    wait_create_table(table_name, 10, 5)
     table = ddb_resource.Table(table_name)
     with table.batch_writer() as batch:
         for post_id in post_ids:

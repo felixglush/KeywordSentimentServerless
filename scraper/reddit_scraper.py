@@ -35,8 +35,8 @@ def keyword_in_text(keyword, post_text, post_title):
 # and an analysis_results DS with empty lists for the scores and magnitudes of each submission
 def scrape_submissions_from_subreddits(reddit_client, subreddits_list, keywords_list):
     sts.submissions = {"hot": {}, "new": {}}
-    # sts.analysis_results = {"reddit": {}}
-    # sts.analysis_results["reddit"]["subreddits"] = []
+    sts.analysis_results = {"reddit": {}}
+    sts.analysis_results["reddit"]["subreddits"] = []
     for subreddit in subreddits_list:
         hot, new = get_submissions(reddit_client, subreddit)
         data = {"subreddit": subreddit, "keywords_list": keywords_list}

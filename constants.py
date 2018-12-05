@@ -1,3 +1,4 @@
+s3_input_bucket_name = "keyword-tracker-analysis-input"
 s3_input_bucket = 's3://keyword-tracker-analysis-input'
 s3_output_bucket = 's3://keyword-tracker-analysis-output'
 s3_bucket_texts = '/lines'
@@ -7,4 +8,4 @@ s3_document_filename = "texts.txt"
 s3_id_filename = "ids.txt"
 
 
-sleep_time_for_campaign_poll = 15  # seconds
+sleep_time_for_campaign_poll = 60  # seconds
