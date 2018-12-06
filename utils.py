@@ -1,5 +1,6 @@
 import json
 
+from campaign_parameters import CampaignParameters
 
 
 def create_ok_response(event, result=None, func_name="lambda"):
@@ -34,3 +35,10 @@ def remove_new_lines(posts):
     return cleaned_posts
 
 
+def extract_campaign_params_ddb(record):
+    campain_name = record["Keys"]["CampaignName"]["S"]
+    campaign_params_info = record["NewImage"]
+
+    parameters = CampaignParameters(campain_name, campaign_params_info["sources"]["SS"],
+                                    campaign_params_info["keywords"]["SS"], campaign_params_info["subreddits"]["SS"])
+    return parameters

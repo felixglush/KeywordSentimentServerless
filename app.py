@@ -1,13 +1,16 @@
 import constants
 import parser
+from campaign_parameters import CampaignParameters
 from scraper import reddit_scraper
-from data_accessor import ddb_accessor as ddb
-from data_accessor import s3_accessor as s3
+import data_accessor.ddb_accessor as ddb
+import data_accessor.s3_accessor as s3
+import data_accessor.s3_utils
 import sentimenter
 import time
 import boto3
 import json
 import os
+from utils import extract_campaign_params_ddb
 # TODO
 # done. Add twitter
 # done. Stream new twitter submissions to lambda
@@ -24,41 +27,34 @@ import os
 # Flag posts requiring attention
 
 
-def invoke_reddit_scraper_lambda(query_parameters):
+def invoke_reddit_scraper_lambda(campaign_parameters):
     lambda_client = boto3.client(service_name='lambda', region_name='us-east-1')
     lambda_client.invoke(
         FunctionName="arn:aws:lambda:us-east-1:433181616955:function:serverless-keywordtracker-dev-hello",
         InvocationType="Event",
-        Payload=json.dumps(query_parameters),
+        Payload=json.dumps(campaign_parameters.__dict__),
     )
 
 
 def handle_scrape_reddit(event):
-    query_parameters = {
-        "campaign_name": event["campaign_name"],
-        "keywords_list": event["keywords_list"],
-        "subreddits_list": event["subreddits_list"],
-        "sources": event["sources"]
-    }
+    query_parameters = CampaignParameters(event["name"], event["sources"],
+                                          event["keywords"], event["subreddits"])
 
     print("query_parameters", query_parameters)
-    responses = run_reddit_scraper(query_parameters)
-    sentimenter.analyze_async_job(parser.reddit_posts_list, query_parameters)
-    batch_put_posts(parser.reddit_posts_list, "reddit")
-
-    return responses
+    if "reddit" in query_parameters.sources:
+        submissions = run_reddit_scraper(query_parameters)
+        sentimenter.analyze_async_job(parser.reddit_posts_list, query_parameters)
+        batch_put_posts(parser.reddit_posts_list, "reddit")
+        return submissions
+    return None
 
 
 def run_reddit_scraper(query_parameters):
     print("running scraper")
-    subreddits_list = []
-    if "reddit" in query_parameters["sources"]:
-        subreddits_list = query_parameters["subreddits_list"]
-
     reddit_client = reddit_scraper.init_reddit_scraper()
-    submissions = reddit_scraper.scrape_submissions_from_subreddits(reddit_client, subreddits_list,
-                                                                    query_parameters["keywords_list"])
-
+    submissions = reddit_scraper.scrape_submissions_from_subreddits(reddit_client,
+                                                                    query_parameters.subreddits,
+                                                                    query_parameters.keywords)
     print("reddit submissions", submissions)
     return submissions
 
@@ -67,10 +63,10 @@ def handle_campaign_table_operation(event):
     for record in event["Records"]:
         print("record", record)
         if record["eventName"] == "INSERT":
-            query_parameters = parser.extract_campaign_query_params(record["dynamodb"])
-            if "reddit" in query_parameters["sources"]:
+            query_parameters = extract_campaign_params_ddb(record["dynamodb"])
+            if "reddit" in query_parameters.sources:
                 invoke_reddit_scraper_lambda(query_parameters)
-            if "twitter" in query_parameters["sources"]:
+            if "twitter" in query_parameters.sources:
                 print("todo... invoke twitter search")
 
 
@@ -79,6 +75,10 @@ def process_s3_sentiment_job(event):
         if record["object"] is not None:
             key = record["object"]["key"]  # full path to tar.gz file containing sentiment data
             print(key)
+            s3_object = s3.get_object(constants.s3_output_bucket_name, key)
+            sentiment_list = data_accessor.s3_utils.read_targz_s3_output(s3_object.get()["Body"].read())
+
+            # put results into Post table
 
 
 def process_tweets(tweet_data):

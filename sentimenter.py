@@ -1,21 +1,23 @@
 import boto3
 import constants
-from data_accessor import s3_accessor as s3
+import data_accessor.s3_utils
 from utils import remove_new_lines
-
+from data_accessor import s3_accessor as s3
 comprehend_client = boto3.client(service_name='comprehend', region_name='us-east-1')
 
 
 def analyze_async_job(posts, query_parameters):
     print("setting up async job")
     cleaned_posts = remove_new_lines(posts)
-    metadata = {"campaign_name": query_parameters["campaign_name"]}
+    metadata = {"campaign_name": query_parameters.name}
     # text_container, id_container = s3.setup_docs_for_upload(cleaned_posts, metadata)
     # s3.upload_collection(constants.s3_input_bucket_name, text_container, id_container)
     # response = start_sentiment_detection_job()
     # print("job id", response["JobId"])
-    # TODO remove s3.get_object(..) below. let s3 event trigger lambda
-    s3.get_object(constants.s3_output_bucket_name, None)
+    object = s3.get_object(constants.s3_output_bucket_name, None)
+    sentiment_list = data_accessor.s3_utils.read_targz_s3_output(object.get()["Body"].read())
+    for item in sentiment_list:
+        print("item", item)
 
 
 def start_sentiment_detection_job():
@@ -45,7 +47,10 @@ def analyze_tweets(tweets_structure):
 
 
 def analyze_batch_posts(documents):
-    return comprehend_client.batch_detect_sentiment(TextList=documents, LanguageCode='en')
+    if len(documents) <= 25:
+        return comprehend_client.batch_detect_sentiment(TextList=documents, LanguageCode='en')
+    else:
+        return None  # TODO handle more than 25 documents
 
 
 # text sent to Amazon Comprehend must be under 5000 bytes

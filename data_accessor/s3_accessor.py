@@ -1,11 +1,7 @@
-import json
-from io import BytesIO
-
 import boto3
 import utils
 import constants
 from constants import type_id, type_text
-import tarfile
 
 s3_resource = boto3.resource("s3")
 
@@ -17,8 +13,11 @@ class DocumentContainer:
         self.doc_string = doc_string
         self.metadata = metadata
 
+    def __repr__(self):
+        return "Doc Type: {0}. Metadata: {1}.\nDocument: {2}\n".format(self.doc_type, self.metadata, self.doc_string)
 
-def list_objects(bucket_name):
+
+def list_object_keys_in_bucket(bucket_name):
     bucket = s3_resource.Bucket(bucket_name)
     for obj in bucket.objects.all():
         print(obj.key)
@@ -48,7 +47,7 @@ def upload_collection(bucket_name, *doc_containers):
 
 
 def upload(bucket_name, doc_container):
-    list_objects(constants.s3_output_bucket_name)
+    # TODO: exception handling
     in_bucket = s3_resource.Bucket(bucket_name)
     in_bucket.put_object(Key=doc_container.doc_type, Body=doc_container.doc_string)
     if doc_container.doc_type == type_id:
@@ -60,18 +59,9 @@ def upload(bucket_name, doc_container):
 
 def get_object(bucket_name, key):
     key = "433181616955-SENTIMENT-6ec49c899f5dbb077b7d8e8cfef8a814/output/output.tar.gz"
+    # TODO: exception handling for nonexistent object
     obj = s3_resource.Object(bucket_name, key)
-    print("Object key", key, obj)
-    content = read_targz_contents(obj.get()["Body"].read())
+    print("Getting object", obj)
+    return obj
 
 
-def read_targz_contents(targz_bytes):
-    bytestream = BytesIO(targz_bytes)
-    with tarfile.open(fileobj=bytestream) as targz:
-        for member in targz.getmembers():
-            f = targz.extractfile(member)
-            content = f.read().decode("utf-8")
-            splitlist = content.split("\n")
-            # lines = [line.rstrip('\n') for line in f.read()]
-            # print("lines", lines)
-            return splitlist

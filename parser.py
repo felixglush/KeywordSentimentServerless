@@ -61,14 +61,3 @@ def post_already_exists(post_id, posts):
     return post_id in list_of_ids
 
 
-def extract_campaign_query_params(record):
-    campain_name = record["Keys"]["CampaignName"]["S"]
-    campaign_params_info = record["NewImage"]
-    query_parameters = {
-        "campaign_name": campain_name,
-        "keywords_list": campaign_params_info["keywords"]["SS"],
-        "subreddits_list": campaign_params_info["subreddits"]["SS"],
-        "sources": campaign_params_info["sources"]["SS"]
-    }
-
-    return query_parameters
