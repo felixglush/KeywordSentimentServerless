@@ -37,6 +37,7 @@ def scrape_submissions_from_subreddits(reddit_client, subreddits_list, keywords_
     sts.submissions = {"hot": {}, "new": {}}
     sts.analysis_results = {"reddit": {}}
     sts.analysis_results["reddit"]["subreddits"] = []
+    parser.reddit_posts_list = []
     for subreddit in subreddits_list:
         hot, new = get_submissions(reddit_client, subreddit)
         data = {"subreddit": subreddit, "keywords_list": keywords_list}

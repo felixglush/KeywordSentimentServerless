@@ -59,14 +59,12 @@ functions:
     handler: handler.scrape_reddit
   createCampaignTable:
     handler: handler.handle_campaign_table_operation
-    environment:
-      INVOKE_CAMPAIGN_ITERATOR: false
   processTweets:
     handler: handler.process_tweets
+  processS3SentimentJob:
+    handler: handler.process_s3_sentiment_job
   iteratePollThroughCampaigns:
     handler: handler.iterate_poll_through_campaigns
-    environment:
-      REINVOKE_CAMPAIGN_ITERATOR: false
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

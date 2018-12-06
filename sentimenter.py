@@ -1,24 +1,31 @@
 import boto3
 import constants
 from data_accessor import s3_accessor as s3
+from utils import remove_new_lines
+
 comprehend_client = boto3.client(service_name='comprehend', region_name='us-east-1')
 
 
-def analyze_async_job(posts):
+def analyze_async_job(posts, query_parameters):
     print("setting up async job")
-    text_container, id_container = s3.setup_docs_for_upload(posts)
-    s3.upload_collection(constants.s3_input_bucket_name, text_container, id_container)
-    start_sentiment_detection_job()
+    cleaned_posts = remove_new_lines(posts)
+    metadata = {"campaign_name": query_parameters["campaign_name"]}
+    # text_container, id_container = s3.setup_docs_for_upload(cleaned_posts, metadata)
+    # s3.upload_collection(constants.s3_input_bucket_name, text_container, id_container)
+    # response = start_sentiment_detection_job()
+    # print("job id", response["JobId"])
+    # TODO remove s3.get_object(..) below. let s3 event trigger lambda
+    s3.get_object(constants.s3_output_bucket_name, None)
 
 
 def start_sentiment_detection_job():
     return comprehend_client.start_sentiment_detection_job(
         InputDataConfig={
-            'S3Uri': constants.s3_input_bucket,
+            'S3Uri': constants.s3_input_bucket_uri,
             'InputFormat': 'ONE_DOC_PER_LINE'
         },
         OutputDataConfig={
-            'S3Uri': constants.s3_output_bucket
+            'S3Uri': constants.s3_output_bucket_uri
         },
         DataAccessRoleArn=constants.s3_data_access_role_arn,
         JobName=constants.s3_comprehend_sentiment_detection_job_name,
@@ -51,29 +58,3 @@ def documents_within_limits(*text_list):
         if not is_text_within_limits(text):
             return False
     return True
-
-# def add_auxiliary_data(analysis_results, key, submission_type, submission_type_string, subreddit):
-#     key_target = analysis_results["reddit"][subreddit][submission_type_string][key]
-#     key_target["urls"] = submission_type[subreddit][key]["url"]
-#     key_target["ids"] = submission_type[subreddit][key]["id"]
-#     key_target["upvotes"] = submission_type[subreddit][key]["score"]
-#     key_target["creation_dates"] = submission_type[subreddit][key]["created"]
-#
-#
-# def populate_analysis_results(submission_type, submission_type_string, analysis_results):
-#     for subreddit in submission_type:
-#         for key in submission_type[subreddit]:
-#             titles = submission_type[subreddit][key]["title"]
-#             bodies = submission_type[subreddit][key]["body"]
-#             add_auxiliary_data(analysis_results, key, submission_type, submission_type_string, subreddit)
-#
-#             add_comprehend_result(analysis_results, subreddit, titles, submission_type_string, "title", key)
-#             add_comprehend_result(analysis_results, subreddit, bodies, submission_type_string, "body", key)
-#
-#
-# def analyze_reddit(submissions, analysis_results):
-#     hot = submissions["hot"]
-#     new = submissions["new"]
-#     populate_analysis_results(hot, "hot", analysis_results)
-#     populate_analysis_results(new, "new", analysis_results)
-#     return analysis_results

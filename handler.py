@@ -27,3 +27,9 @@ def iterate_poll_through_campaigns(event, context):
     log_lambda_trigger(event, "iterate_poll_through_campaigns")
     app.iterate_and_poll_through_campaigns()
     return create_ok_response(event=event, func_name="iterate_poll_through_campaigns")
+
+
+def process_s3_sentiment_job(event, context):
+    log_lambda_trigger(event, "process_s3_sentiment_job")
+    app.process_s3_sentiment_job(event)
+    return create_ok_response(event=event, func_name="process_s3_sentiment_job")

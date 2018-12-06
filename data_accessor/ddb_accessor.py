@@ -83,6 +83,8 @@ def batch_put_posts(posts, source):
                     "Post": post,
                     "Source": source,
                     "IsAnalyzed": analyzed,
+                    "Sentiment": post["sentiment"],
+                    "SentimentScore": post["sentiment_score"]
                 }
             )
 

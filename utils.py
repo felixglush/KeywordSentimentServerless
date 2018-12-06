@@ -1,6 +1,7 @@
 import json
 
 
+
 def create_ok_response(event, result=None, func_name="lambda"):
     body = {
         "message": "Hey there! The " + func_name + " function executed successfully!",
@@ -20,3 +21,16 @@ def log_lambda_trigger(event, func_name, who=""):
 
 def is_empty_string(string):
     return string == "" or string is None
+
+
+def remove_new_line(post):
+    post["title"] = post["title"].replace('\n', ' ')
+    post["body"] = post["body"].replace('\n', ' ')
+    return post
+
+
+def remove_new_lines(posts):
+    cleaned_posts = [remove_new_line(post) for post in posts]
+    return cleaned_posts
+
+
