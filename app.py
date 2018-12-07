@@ -30,7 +30,7 @@ from utils import extract_campaign_params_ddb
 def invoke_reddit_scraper_lambda(campaign_parameters):
     lambda_client = boto3.client(service_name='lambda', region_name='us-east-1')
     lambda_client.invoke(
-        FunctionName="arn:aws:lambda:us-east-1:433181616955:function:serverless-keywordtracker-dev-hello",
+        FunctionName="arn:aws:lambda:us-east-1:433181616955:function:serverless-keywordtracker-dev-scrapeReddit",
         InvocationType="Event",
         Payload=json.dumps(campaign_parameters.__dict__),
     )
@@ -43,7 +43,8 @@ def handle_scrape_reddit(event):
     print("query_parameters", query_parameters)
     if "reddit" in query_parameters.sources:
         submissions = run_reddit_scraper(query_parameters)
-        sentimenter.analyze_async_job(parser.reddit_posts_list, query_parameters)
+        # DDB Stream enabled on Posts table.
+        # Invokes process_posts_table_stream lambda function and passes 25 posts to it for sentiment analysis.
         batch_put_posts(parser.reddit_posts_list, "reddit")
         return submissions
     return None
@@ -59,7 +60,7 @@ def run_reddit_scraper(query_parameters):
     return submissions
 
 
-def handle_campaign_table_operation(event):
+def process_campaign_table_stream(event):
     for record in event["Records"]:
         print("record", record)
         if record["eventName"] == "INSERT":
@@ -67,7 +68,12 @@ def handle_campaign_table_operation(event):
             if "reddit" in query_parameters.sources:
                 invoke_reddit_scraper_lambda(query_parameters)
             if "twitter" in query_parameters.sources:
+                # TODO: twitter
                 print("todo... invoke twitter search")
+
+
+def process_posts_table_stream(event):
+    return None
 
 
 def process_s3_sentiment_job(event):
@@ -77,8 +83,10 @@ def process_s3_sentiment_job(event):
             print(key)
             s3_object = s3.get_object(constants.s3_output_bucket_name, key)
             sentiment_list = data_accessor.s3_utils.read_targz_s3_output(s3_object.get()["Body"].read())
-
-            # put results into Post table
+            if sentiment_list is not None:
+                for item in sentiment_list:
+                    print("item", item)
+                # put results into Post table
 
 
 def process_tweets(tweet_data):
@@ -181,4 +189,3 @@ def run_delete_campaign_table(info):
     print("run_delete_table with info", info)
     table_name = info["Keys"]["CampaignName"]["S"].replace(" ", "")
     ddb.delete_table(table_name)
-

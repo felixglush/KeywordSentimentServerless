@@ -58,7 +58,7 @@ def upload(bucket_name, doc_container):
 
 
 def get_object(bucket_name, key):
-    key = "433181616955-SENTIMENT-6ec49c899f5dbb077b7d8e8cfef8a814/output/output.tar.gz"
+    # key = "433181616955-SENTIMENT-6ec49c899f5dbb077b7d8e8cfef8a814/output/output.tar.gz"
     # TODO: exception handling for nonexistent object
     obj = s3_resource.Object(bucket_name, key)
     print("Getting object", obj)

@@ -10,10 +10,10 @@ def scrape_reddit(event, context):
 
 # Triggered by putting/deleting an item in Campaigns table by enabling a DynamoDB stream on the table
 # Item is passed to this function in the event parameter
-def handle_campaign_table_operation(event, context):
-    log_lambda_trigger(event, "handle_campaign_table_operation", "A DynamoDB event trigger")
-    app.handle_campaign_table_operation(event)
-    return create_ok_response(event=event, func_name="handle_campaign_table_operation")
+def process_campaign_table_stream(event, context):
+    log_lambda_trigger(event, "process_campaign_table_stream", "A DynamoDB event trigger")
+    app.process_campaign_table_stream(event)
+    return create_ok_response(event=event, func_name="process_campaign_table_stream")
 
 
 # Triggered by an application that polls the Twitter API using a Cloudwatch rule with a given search text.
@@ -33,3 +33,10 @@ def process_s3_sentiment_job(event, context):
     log_lambda_trigger(event, "process_s3_sentiment_job")
     app.process_s3_sentiment_job(event)
     return create_ok_response(event=event, func_name="process_s3_sentiment_job")
+
+
+def process_posts_table_stream(event, context):
+    log_lambda_trigger(event, "process_posts_table_stream")
+    app.process_posts_table_stream(event)
+    return create_ok_response(event=event, func_name="process_posts_table_stream")
+

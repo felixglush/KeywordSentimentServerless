@@ -10,14 +10,14 @@ def analyze_async_job(posts, query_parameters):
     print("setting up async job")
     cleaned_posts = remove_new_lines(posts)
     metadata = {"campaign_name": query_parameters.name}
-    # text_container, id_container = s3.setup_docs_for_upload(cleaned_posts, metadata)
-    # s3.upload_collection(constants.s3_input_bucket_name, text_container, id_container)
-    # response = start_sentiment_detection_job()
-    # print("job id", response["JobId"])
-    object = s3.get_object(constants.s3_output_bucket_name, None)
-    sentiment_list = data_accessor.s3_utils.read_targz_s3_output(object.get()["Body"].read())
-    for item in sentiment_list:
-        print("item", item)
+    text_container, id_container = s3.setup_docs_for_upload(cleaned_posts, metadata)
+    s3.upload_collection(constants.s3_input_bucket_name, text_container, id_container)
+    response = start_sentiment_detection_job()
+    print("job id", response["JobId"])
+    # object = s3.get_object(constants.s3_output_bucket_name, None)
+    # sentiment_list = data_accessor.s3_utils.read_targz_s3_output(object.get()["Body"].read())
+    # for item in sentiment_list:
+    #     print("item", item)
 
 
 def start_sentiment_detection_job():
