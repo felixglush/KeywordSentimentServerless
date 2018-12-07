@@ -1,8 +1,11 @@
+from decimal import Decimal
+
 import boto3
 import constants
 import data_accessor.s3_utils
 from utils import remove_new_lines
 from data_accessor import s3_accessor as s3
+import os
 comprehend_client = boto3.client(service_name='comprehend', region_name='us-east-1')
 
 
@@ -48,14 +51,42 @@ def analyze_tweets(tweets_structure):
 
 def analyze_batch_posts(documents):
     if len(documents) <= 25:
-        return comprehend_client.batch_detect_sentiment(TextList=documents, LanguageCode='en')
+        try:
+            if os.environ["ENABLE_COMPREHEND"] == "true":
+                # returns {"ResultList":[], "ErrorList":[]}
+                return comprehend_client.batch_detect_sentiment(TextList=documents, LanguageCode='en')
+            elif os.environ["ENABLE_COMPREHEND"] == "false":
+                # fake sentiment data
+                fake_data = {"ResultList": [], "ErrorList": []}
+                create_fake_data(documents, fake_data)
+                return fake_data
+        except KeyError:
+            print("No such key ENABLE_COMPREHEND")
+            return None
+
     else:
         return None  # TODO handle more than 25 documents
 
 
+def create_fake_data(documents, fake_data):
+    num_of_posts = len(documents)
+    for i in range(num_of_posts):
+        fake_sentiment_item = {
+            'Index': i,
+            'Sentiment': 'placeholder sentiment',
+            'SentimentScore': {
+                'Positive': Decimal(0.0),
+                'Negative': Decimal(0.0),
+                'Neutral': Decimal(0.0),
+                'Mixed': Decimal(0.0)
+            }
+        }
+        fake_data["ResultList"].append(fake_sentiment_item)
+
+
 # text sent to Amazon Comprehend must be under 5000 bytes
 def is_text_within_limits(document):
-    return len(document.encode("utf8")) <= 5000 and len(document) > 0
+    return 0 < len(document) <= 5000
 
 
 def documents_within_limits(*text_list):

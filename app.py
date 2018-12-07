@@ -11,6 +11,8 @@ import boto3
 import json
 import os
 from utils import extract_campaign_params_ddb
+
+
 # TODO
 # done. Add twitter
 # done. Stream new twitter submissions to lambda
@@ -45,7 +47,7 @@ def handle_scrape_reddit(event):
         submissions = run_reddit_scraper(query_parameters)
         # DDB Stream enabled on Posts table.
         # Invokes process_posts_table_stream lambda function and passes 25 posts to it for sentiment analysis.
-        batch_put_posts(parser.reddit_posts_list, "reddit")
+        batch_put_posts(parser.reddit_posts_list)
         return submissions
     return None
 
@@ -72,8 +74,42 @@ def process_campaign_table_stream(event):
                 print("todo... invoke twitter search")
 
 
+def extract_info_from_streamed_posts_items(records):
+    titles, bodies, post_ids = [], [], []
+    for record in records:
+        if record["eventName"] == "INSERT" and "Post" in record["dynamodb"]["NewImage"]:
+            post_ddb_json = record["dynamodb"]["NewImage"]["Post"]["M"]
+            title = post_ddb_json["title"]["S"]
+            body = ""
+            if post_ddb_json["body_present"]["BOOL"] == "True":
+                body = post_ddb_json["body"]["S"]
+            bodies.append(body)
+
+            post_id = post_ddb_json["id"]["S"]
+            titles.append(title)
+            post_ids.append(post_id)
+        elif record["eventName"] == "MODIFY":
+            print("TODO... handle update event")
+    return titles, bodies, post_ids
+
+
 def process_posts_table_stream(event):
-    return None
+    post_titles, post_bodies, post_ids = extract_info_from_streamed_posts_items(event["Records"])
+    if len(post_titles) <= 25 and len(post_bodies) <= 25:
+        titles_analysis = sentimenter.analyze_batch_posts(post_titles)
+        bodies_analysis = sentimenter.analyze_batch_posts(post_bodies)
+
+        title_results = titles_analysis["ResultList"]
+        body_results = bodies_analysis["ResultList"]
+
+        # TODO handle error list
+        titles_errors = titles_analysis["ErrorList"]
+        body_errors = bodies_analysis["ErrorList"]
+
+        # update each Item in Posts table with analysis results
+        ddb.update_posts_with_analysis(title_results, body_results, post_ids)
+    else:
+        return "Too many posts"
 
 
 def process_s3_sentiment_job(event):
@@ -92,19 +128,15 @@ def process_s3_sentiment_job(event):
 def process_tweets(tweet_data):
     tweets_structure = parser.parse_twitter_tweets(tweet_data)
     # sentimenter.analyze_tweets(tweets_structure)  # will modify tweets_structure by inputting sentiment data
-    batch_put_posts(tweets_structure, "twitter")
+    batch_put_posts(tweets_structure)
 
     # put ids into campaign_name table
 
     return tweets_structure
 
 
-def batch_put_posts(posts, source):
-    ddb.batch_put_posts(posts, source)
-
-
-def batch_put_ids(post_ids, table_name):
-    ddb.batch_put_ids(post_ids, table_name)
+def batch_put_posts(posts):
+    ddb.batch_put_posts(posts)
 
 
 def iterate_and_poll_through_campaigns():

@@ -61,10 +61,14 @@ functions:
     handler: handler.process_campaign_table_stream
   processTweets:
     handler: handler.process_tweets
+    environment:
+      ENABLE_COMPREHEND: false
   processS3SentimentJob:
     handler: handler.process_s3_sentiment_job
   processPostsTableStream:
     handler: handler.process_posts_table_stream
+    environment:
+      ENABLE_COMPREHEND: false
   iteratePollThroughCampaigns:
     handler: handler.iterate_poll_through_campaigns
 

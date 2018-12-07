@@ -1,7 +1,7 @@
 import json
-from scraper import struct_setup as sts
 import sentimenter
 from scraper import reddit_scraper
+import utils
 
 
 def parse_twitter_tweets(tweet_data):
@@ -37,20 +37,23 @@ def parse_reddit_submissions(submission_type, type_string, keywords_list, subred
             for keyword in keywords_list:
                 if reddit_scraper.keyword_in_text(keyword, post_text, post_title):
                     if not post_already_exists(str(submission.id), reddit_posts_list):
+                        empty_body = utils.is_empty_string(post_text)
+                        if empty_body:
+                            post_text = " "  # DynamoDB doesn't support nonempty strings so this is a workaround
                         post = {
-                            "title": post_title,
-                            "body": post_text,
+                            "title": post_title,    # guaranteed to be present
+                            "body": post_text,      # not required to be present
+                            "body_present": not empty_body,
+                            "subreddit": subreddit,
                             "score": str(submission.score),
                             "id": str(submission.id),
                             "url": submission.url,
                             "comms_num": str(submission.num_comments),
                             "date": str(submission.created),
-                            "filters": [type_string],  # i.e. hot, new
-                            "sentiment": None,
-                            "sentiment_score": {}
+                            "filters": [type_string],  # i.e. hot, new, etc
+                            "source": "reddit",
+                            "is_analyzed": False
                         }
-                        subreddit_branch_posts = sts.submissions[type_string][subreddit][keyword]["posts"]
-                        subreddit_branch_posts.append(post)
                         reddit_posts_list.append(post)
                     else:
                         append_filter_to_post(type_string, str(submission.id))

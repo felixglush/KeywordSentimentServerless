@@ -37,6 +37,6 @@ def process_s3_sentiment_job(event, context):
 
 def process_posts_table_stream(event, context):
     log_lambda_trigger(event, "process_posts_table_stream")
-    app.process_posts_table_stream(event)
-    return create_ok_response(event=event, func_name="process_posts_table_stream")
+    result = app.process_posts_table_stream(event)
+    return create_ok_response(event=event, result=result, func_name="process_posts_table_stream")
 

@@ -6,5 +6,5 @@ class CampaignParameters:
         self.subreddits = subreddits
 
     def __repr__(self):
-        return "Campaign name: {0}. Sources: {1}.\nKeywords: {2}.\n Subreddits: {3}.\n".\
+        return "Campaign name: {0}. Sources: {1}.Keywords: {2}. Subreddits: {3}.".\
             format(self.name, self.sources, self.keywords, self.subreddits)
