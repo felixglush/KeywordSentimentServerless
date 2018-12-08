@@ -5,8 +5,7 @@ from scraper import reddit_scraper
 import data_accessor.ddb_accessor as ddb
 import data_accessor.s3_accessor as s3
 import data_accessor.s3_utils
-import sentimenter
-import time
+from sentiment import sentimenter
 import boto3
 import json
 import os
@@ -46,7 +45,8 @@ def handle_scrape_reddit(event):
     if "reddit" in query_parameters.sources:
         submissions = run_reddit_scraper(query_parameters)
         # DDB Stream enabled on Posts table.
-        # Invokes process_posts_table_stream lambda function and passes 25 posts to it for sentiment analysis.
+        # Invokes process_posts_table_stream lambda function and passes 25 posts to it for sentiment analysis until
+        # all documents are analyzed
         batch_put_posts(parser.reddit_posts_list)
         return submissions
     return None
@@ -81,7 +81,7 @@ def extract_info_from_streamed_posts_items(records):
             post_ddb_json = record["dynamodb"]["NewImage"]["Post"]["M"]
             title = post_ddb_json["title"]["S"]
             body = ""
-            if post_ddb_json["body_present"]["BOOL"] == "True":
+            if post_ddb_json["body_present"]["BOOL"] == "True":  # TODO handle empty body
                 body = post_ddb_json["body"]["S"]
             bodies.append(body)
 
@@ -139,61 +139,6 @@ def batch_put_posts(posts):
     ddb.batch_put_posts(posts)
 
 
-def iterate_and_poll_through_campaigns():
-    lambda_client = boto3.client(service_name='lambda', region_name='us-east-1')
-    ddb_resource = boto3.resource('dynamodb', region_name='us-east-1')
-    campaign_table = ddb_resource.Table("Campaigns")
-    response = campaign_table.scan()
-    items = response["Items"]
-    count = response["Count"]
-    timeout = count * constants.sleep_time_for_campaign_poll + 20
-    lambda_client.update_function_configuration(
-        FunctionName='function:serverless-keywordtracker-dev-iteratePollThroughCampaigns',
-        Timeout=timeout
-    )
-
-    cloudwatch_client = boto3.client('events')
-    if len(items) != 0:
-        cloudwatch_client.enable_rule(
-            Name='aws-serverless-repository-TwitterSearchPollerTimer-16ZY6SG281Q6X'
-        )
-    time.sleep(10)
-    print('items', items)
-
-    for campaign in items:
-        query_parameters = {
-            "campaign_name": campaign["CampaignName"],
-            "sources": campaign["sources"],
-            "keywords": campaign["keywords"],
-            "subreddits": campaign["subreddits"]
-        }
-        print("Campaign parameters", query_parameters)
-
-        # update twitter poller lambda function configuration
-        search_text = ' OR '.join(query_parameters["keywords"])
-        response = lambda_client.update_function_configuration(
-            FunctionName='aws-serverless-repository-aws-TwitterSearchPoller-6GH8Y61OUDGH',
-            Environment={
-                'Variables': {
-                    'SEARCH_TEXT': search_text,
-                }
-            }
-        )
-
-        # now the poller will automatically invoke the processTweets lambda function with the keywords of the campaign
-        time.sleep(constants.sleep_time_for_campaign_poll)
-
-    # stop the poller once done
-    cloudwatch_client.disable_rule(
-        Name='aws-serverless-repository-TwitterSearchPollerTimer-16ZY6SG281Q6X'
-    )
-
-    print("REINVOKE_CAMPAIGN_ITERATOR", os.environ["REINVOKE_CAMPAIGN_ITERATOR"])
-    if os.environ["REINVOKE_CAMPAIGN_ITERATOR"] == "true":
-        print("reinvoking iteratePollThroughCampaigns")
-        invoke_campaign_iterator()
-
-
 def invoke_campaign_iterator():
     lambda_client = boto3.client(service_name='lambda', region_name='us-east-1')
     lambda_client.invoke(
@@ -203,18 +148,21 @@ def invoke_campaign_iterator():
 
 
 def check_invoke_campaign_iterator():
-    if os.environ["INVOKE_CAMPAIGN_ITERATOR"] == "true":
-        print("invoking function iteratePollThroughCampaigns")
-        invoke_campaign_iterator()
-        lambda_client = boto3.client(service_name='lambda', region_name='us-east-1')
-        lambda_client.update_function_configuration(
-            FunctionName='function:serverless-keywordtracker-dev-iteratePollThroughCampaigns',
-            Environment={
-                'Variables': {
-                    'INVOKE_CAMPAIGN_ITERATOR': "false",
+    try:
+        if os.environ["INVOKE_CAMPAIGN_ITERATOR"] == "true":
+            print("invoking function iteratePollThroughCampaigns")
+            invoke_campaign_iterator()
+            lambda_client = boto3.client(service_name='lambda', region_name='us-east-1')
+            lambda_client.update_function_configuration(
+                FunctionName='function:serverless-keywordtracker-dev-iteratePollThroughCampaigns',
+                Environment={
+                    'Variables': {
+                        'INVOKE_CAMPAIGN_ITERATOR': "false",
+                    }
                 }
-            }
-        )
+            )
+    except KeyError:
+        print("No such environment variable INVOKE_CAMPAIGN_ITERATOR")
 
 
 def run_delete_campaign_table(info):

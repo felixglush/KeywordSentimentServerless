@@ -1,7 +1,7 @@
 import time
 import uuid
 import boto3
-import json
+from data_accessor.ddb_utils import convert_to_decimal
 
 ddb_client = boto3.client('dynamodb', region_name='us-east-1')
 ddb_resource = boto3.resource('dynamodb', region_name='us-east-1')
@@ -90,6 +90,8 @@ def update_posts_with_analysis(titles_results, bodies_results, post_ids):
             post_id = post_ids[index]
             # add title and body text analysis
             # set IsAnalyzed to True
+            title_doc_analysis_converted = convert_to_decimal(title_doc_analysis["SentimentScore"])
+            body_doc_analysis_converted = convert_to_decimal(body_doc_analysis["SentimentScore"])
             table.update_item(
                 Key={"PostId": post_id},
                 UpdateExpression="SET IsAnalyzed = :analyzed,  TitleSentiment = :title_sentiment, TitleSentimentScore "
@@ -97,9 +99,9 @@ def update_posts_with_analysis(titles_results, bodies_results, post_ids):
                 ExpressionAttributeValues={
                     ":analyzed": True,
                     ":title_sentiment": title_doc_analysis["Sentiment"],
-                    ":title_score": title_doc_analysis["SentimentScore"],
+                    ":title_score": title_doc_analysis_converted,
                     ":body_sentiment": body_doc_analysis["Sentiment"],
-                    ":body_score": body_doc_analysis["SentimentScore"],
+                    ":body_score": body_doc_analysis_converted,
                 }
             )
     print("DONE UPDATING ITEMS")
