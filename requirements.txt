@@ -1,2 +1,4 @@
+elasticsearch
+botocore
 boto3
 praw

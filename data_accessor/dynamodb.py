@@ -1,16 +1,30 @@
+import pprint
 import time
 import uuid
 import boto3
-from data_accessor.ddb_utils import convert_to_decimal
+from utilities.ddb_utils import convert_to_decimal
+from botocore.exceptions import ClientError
 
 ddb_client = boto3.client('dynamodb', region_name='us-east-1')
 ddb_resource = boto3.resource('dynamodb', region_name='us-east-1')
 
 
+def scan_table(table_name):
+    try:
+        table = ddb_resource.Table(table_name)
+        return table.scan()
+    except ClientError as er:
+        if er.response["Error"]["Code"] == 'ResourceNotFoundException':
+            print("Table " + table_name + " does not exist. Create the table first and try again.")
+        else:
+            print("Unknown exception occurred while querying for the " + table_name + " table. Printing full error:")
+            pprint.pprint(er.response)
+
+
 def table_exists(table_name):
     response = ddb_client.list_tables()
     print("list of tables", response)
-    table_names = response["TableNames"]  # an array
+    table_names = response["TableNames"]
     if table_name not in table_names:
         return False
     else:
@@ -85,7 +99,7 @@ def update_posts_with_analysis(titles_results, bodies_results, post_ids):
         # title_doc_analysis: {"Index": 123, "Sentiment": "", "SentimentScore": {}}
         title_doc_analysis = titles_results[index]
         body_doc_analysis = bodies_results[index]
-        if title_doc_analysis["Index"] == body_doc_analysis["Index"]:
+        if title_doc_analysis["Index"] == body_doc_analysis["Index"]:  # sanity check
             index = title_doc_analysis["Index"]
             post_id = post_ids[index]
             # add title and body text analysis

@@ -1,5 +1,5 @@
 import boto3
-import utils
+from utilities import utils
 import constants
 from constants import type_id, type_text
 

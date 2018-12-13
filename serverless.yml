@@ -69,8 +69,8 @@ functions:
     handler: handler.process_posts_table_stream
     environment:
       ENABLE_COMPREHEND: false
-  iteratePollThroughCampaigns:
-    handler: handler.iterate_poll_through_campaigns
+  iterateThroughCampaignsReddit:
+    handler: handler.iterate_through_campaigns_reddit
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

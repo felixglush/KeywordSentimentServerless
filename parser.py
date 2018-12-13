@@ -1,9 +1,8 @@
 import json
 
-import sentiment.sentiment_utils
-from sentiment import sentimenter
+import utilities.sentiment_utils
 from scraper import reddit_scraper
-import utils
+from utilities import utils
 
 
 def parse_twitter_tweets(tweet_data):
@@ -35,7 +34,7 @@ def append_filter_to_post(type_string, post_id):
 def parse_reddit_submissions(submission_type, type_string, keywords_list, subreddit):
     for submission in submission_type:
         post_title, post_text = submission.title, submission.selftext
-        if sentiment.sentiment_utils.documents_within_limits(post_title, post_text):
+        if utilities.sentiment_utils.documents_within_limits(post_title, post_text):
             for keyword in keywords_list:
                 if reddit_scraper.keyword_in_text(keyword, post_text, post_title):
                     if not post_already_exists(str(submission.id), reddit_posts_list):

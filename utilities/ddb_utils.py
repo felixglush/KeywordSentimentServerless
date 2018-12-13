@@ -1,4 +1,4 @@
-from _pydecimal import Decimal
+from decimal import Decimal
 
 
 def convert_to_decimal(sentiment_score):

@@ -1,7 +1,7 @@
 import boto3
 import constants
-from sentiment.sentiment_utils import return_fake_data
-from utils import remove_new_lines
+from utilities.sentiment_utils import return_fake_data
+from utilities.utils import remove_new_lines
 from data_accessor import s3_accessor as s3
 import os
 
@@ -23,7 +23,7 @@ def analyze_batch_posts(documents):
             print("No such key ENABLE_COMPREHEND")
             return return_fake_data(num_docs)
     else:
-        return None  # TODO handle more than 25 documents
+        raise ValueError("Too many documents sent for analysis", documents)
 
 
 def analyze_async_job(posts, query_parameters):
