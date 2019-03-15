@@ -1,6 +1,6 @@
 # KeywordSentimentServerless
 
-An AWS Lambda application that scrapes social media websites for keywords and performs sentiment analysis using Amazon Comprehend on the text containing the keywords.
+An AWS Lambda application that scrapes social media websites for keywords, performs sentiment analysis using Amazon Comprehend on the text containing the keywords, and uploads the data to Amazon Elasticsearch Service.
 
 # Definitions
 **Campaign**: A collection of campaign name, keywords, subreddits to search, and social media websites to search.
